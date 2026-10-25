@@ -77,10 +77,12 @@ class WorkflowTests(TestCase):
         with self.settings(GEMINI_API_KEY=''):
             r=self.post('predict',{'project':self.p.id,'provider':'gemini'});self.assertEqual(r.status_code,400);self.assertEqual(Prediction.objects.count(),0)
     def test_local_model_is_loadable_and_measured(self):
-        artifact=settings.BASE_DIR/'artifacts/victsd-logreg-v1';report=json.loads((artifact/'metrics.json').read_text())
-        ModelRun.objects.create(project=self.p,name='Measured model',artifact_path=str(artifact),report=json.dumps(report))
-        result=local_predict(self.p,['Bạn giải thích rất dễ hiểu, cảm ơn bạn.'])[0]
-        self.assertIn(result['label'],['TOXIC','NON_TOXIC']);self.assertEqual(result['input_tokens'],0);self.assertEqual(report['test']['n'],1000)
+        from tests.model_fixture import local_model_fixture
+        with local_model_fixture() as (artifact,report):
+            ModelRun.objects.create(project=self.p,name='Synthetic test model',artifact_path=str(artifact),report=json.dumps(report))
+            result=local_predict(self.p,['thank you friend'])[0]
+        self.assertEqual(result['label'],'NON_TOXIC');self.assertEqual(result['input_tokens'],0)
+        self.assertGreaterEqual(result['latency_ms'],0)
     def test_csrf_is_required_for_mutation(self):
         client=Client(enforce_csrf_checks=True);client.force_login(self.users[0]);r=client.post('/api/projects',json.dumps({'name':'CSRF rejected'}),content_type='application/json');self.assertEqual(r.status_code,403)
 

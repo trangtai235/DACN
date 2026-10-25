@@ -279,17 +279,22 @@ class StudioTests(TestCase):
         from django.core.management import call_command
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)
-            for name in ('phobert-base','xlmr-large'):
-                model_dir=root/'artifacts'/'transformers'/name
+            for name in ('phobert-base','xlmr-base','xlmr-large'):
+                model_dir=root/'artifacts'/'transformers'/'vihos-full'/name
                 model_dir.mkdir(parents=True)
                 (model_dir/'verified.json').write_text(json.dumps({'inference_passed':True}),encoding='utf-8')
                 (model_dir/'metrics.json').write_text('{}',encoding='utf-8')
             with override_settings(BASE_DIR=root):
                 call_command('seed_demo',password='Synthetic-Pass!47',stdout=io.StringIO())
+                demo=Project.objects.get(is_demo=True)
+                old=ModelRun.objects.create(project=demo,name='Old Transformer',algorithm='transformer_bio',artifact_path=str(root/'old-model'))
+                pref=ensure(demo);pref.active_model=old;pref.save()
                 call_command('seed_demo',password='Unused-Pass!48',stdout=io.StringIO())
         demo=Project.objects.get(is_demo=True)
-        self.assertEqual(set(demo.model_runs.values_list('name',flat=True)),{'PhoBERT-base','XLM-R large'})
-        self.assertEqual(demo.model_runs.count(),2)
+        self.assertEqual(set(demo.model_runs.filter(state='ready').values_list('name',flat=True)),{'PhoBERT-base','XLM-R base','XLM-R large'})
+        self.assertEqual(demo.model_runs.filter(state='ready').count(),3)
+        old.refresh_from_db();self.assertEqual(old.state,'retired')
+        self.assertNotEqual(ensure(demo).active_model_id,old.pk)
         self.assertTrue(Annotation.objects.filter(comment__project=demo).exists());self.assertTrue(User.objects.get(username='tv1').check_password('Synthetic-Pass!47'))
     def test_native_seed_without_optional_transformer_files(self):
         from django.core.management import call_command

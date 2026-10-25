@@ -27,19 +27,24 @@ Xem [QUICKSTART_VI.md](QUICKSTART_VI.md). Cách này không cần Docker, WSL, R
 - Đánh giá: accuracy, precision/recall/macro-F1, từng lớp, confusion matrix, baseline đa số, API ghép cặp cùng mẫu test, token/latency/chi phí ước tính và lịch sử từng lượt.
 - Thực nghiệm nhị phân: lượt đầu có AI được đóng băng, nhóm A/B/C/D, random/fixed/fixed+exploration/adaptive, lượt hai mù, người thứ ba phân xử, ngân sách và tham chiếu độc lập.
 
-## Kết quả đã đo thật
+## Bộ model hiện tại
 
-Cả 3 model dùng ViCTSD, cùng nguồn/split, seed 42, train sạch 6.943, validation 1.988, test 1.000. Mô hình TF-IDF ký tự 3–5 grams. Chỉ chọn siêu tham số trên validation, không fit test.
+Ba model từ `vihos-models-full.zip`: **PhoBERT-base, XLM-R base, XLM-R large**.
+Trọng số đặt tại `backend/artifacts/transformers/vihos-full/` và chạy offline trên backend.
+Xem [MODELS_VI.md](MODELS_VI.md) để tải, cài đặt và kiểm tra model.
 
-| Model | Accuracy | Macro-F1 |
-|---|---:|---:|
-| Logistic Regression | 0,880 | 0,69110 |
-| Linear SVM | 0,879 | 0,69224 |
-| Complement Naive Bayes | 0,867 | 0,69495 |
+| Model | Span F1 partial | Span F1 strict | Char F1 |
+|---|---:|---:|---:|
+| PhoBERT-base | 0,7419 | 0,5006 | 0,6559 |
+| XLM-R base | 0,7786 | 0,5400 | 0,6848 |
+| XLM-R large | 0,7825 | 0,5505 | 0,7023 |
 
-Artifacts và metrics nằm ở `backend/artifacts/`. Ba model online dùng trọng số thật dạng portable, kiểm tra khớp sklearn trên 3 × 1.000 dự đoán. Đây là kết quả ViCTSD, chưa chứng minh khả năng tổng quát hóa sang YouTube.
+Đây là số liệu test từ `metrics.json` được cung cấp, chưa được đo lại trong ứng dụng.
+Không diễn giải F1 span thành accuracy hoặc Macro-F1 phân loại câu. Nhãn câu được suy ra
+từ span độc hại. Chưa có điểm API hoặc kết quả thí nghiệm người dùng cho bộ model này.
 
-Chưa gọi API thật, chưa có điểm API, không có nhãn chuyên gia hay kết quả thí nghiệm người thật được tạo sẵn.
+Các trọng số TF-IDF cũ đã được bỏ. Demo tĩnh hiển thị báo cáo; suy luận Transformer cần
+chạy source Django. Lịch sử model cũ trong database được giữ ở trạng thái `retired`.
 
 ## Sửa API, chọn model và chỉnh giao diện
 

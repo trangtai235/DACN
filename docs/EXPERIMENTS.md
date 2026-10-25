@@ -1,27 +1,23 @@
 # Thiết kế đánh giá cho đồ án
 
-## Kết quả baseline đã chạy
+## Bộ model hiện tại
 
-Nguồn: UIT-ViCTSD, https://github.com/tarudesu/ViCTSD, commit `e1ffb854ef7b7b7ae45a56d132c1f125e02e55e2`.
+Ba model từ `vihos-models-full.zip`: **PhoBERT-base, XLM-R base, XLM-R large**.
+Trọng số đặt tại `backend/artifacts/transformers/vihos-full/` và chạy offline trên backend.
+Xem [MODELS_VI.md](../MODELS_VI.md) để tải, cài đặt và kiểm tra model.
 
-Tập gốc train/validation/test là 7.000 / 2.000 / 1.000 bình luận. Dùng **Toxicity**, không dùng Constructiveness làm nhãn độc hại. Sau chuẩn hóa Unicode, chữ thường và khoảng trắng để phát hiện trùng: train còn 6.943, validation còn 1.988, giữ nguyên 1.000 test. Việc làm sạch xóa cả trùng nội bộ và giao nhau với split được bảo vệ; không chuyển nhãn test vào train.
+| Model | Span F1 partial | Span F1 strict | Char F1 |
+|---|---:|---:|---:|
+| PhoBERT-base | 0,7419 | 0,5006 | 0,6559 |
+| XLM-R base | 0,7786 | 0,5400 | 0,6848 |
+| XLM-R large | 0,7825 | 0,5505 | 0,7023 |
 
-Model TF-IDF char 3–5 gram, 60.000 features, sublinear TF, L2; Logistic Regression class_weight=balanced, seed 42. Thử C=0.5,2,8 trên train; chọn C=8 bằng validation Macro-F1. Chỉ chấm test sau khi chọn; không huấn luyện lại trên validation.
+Đây là số liệu test từ `metrics.json` được cung cấp, chưa được đo lại trong ứng dụng.
+Không diễn giải F1 span thành accuracy hoặc Macro-F1 phân loại câu. Nhãn câu được suy ra
+từ span độc hại. Chưa có điểm API hoặc kết quả thí nghiệm người dùng cho bộ model này.
 
-| Chỉ số trên 1.000 test | Giá trị |
-| --- | ---: |
-| Accuracy | 88,00% |
-| Precision macro | 69,27% |
-| Recall macro | 68,96% |
-| Macro-F1 | 69,11% |
-| F1 NON_TOXIC | 93,27% |
-| F1 TOXIC | 44,95% |
-
-Confusion matrix theo thứ tự [NON_TOXIC,TOXIC], hàng thật/cột dự đoán: `[[831,59],[61,49]]`. Có 61 mẫu độc hại bị bỏ sót. Model không được coi là đủ tin cậy để tự động chốt nhãn.
-
-Test có 890 mẫu không độc hại và 110 độc hại. Một bộ đoán tất cả NON_TOXIC đạt accuracy 89%, cao hơn baseline này, nhưng Macro-F1 chỉ khoảng 47,09%. Vì vậy phải báo từng lớp và Macro-F1, không chỉ chọn accuracy để chứng minh hiệu quả.
-
-Trọng số, file metrics.json và test_predictions.json nằm trong `backend/artifacts/victsd-logreg-v1/`. Hash CSV nguồn nằm trong metrics.json. Thời gian đo là trên máy chạy thực nghiệm, gồm một batch test; không so trực tiếp với độ trễ request mạng mà không nêu giao thức.
+Các trọng số TF-IDF cũ đã được bỏ. Demo tĩnh hiển thị báo cáo; suy luận Transformer cần
+chạy source Django. Lịch sử model cũ trong database được giữ ở trạng thái `retired`.
 
 ## Nhánh API cần chạy sau khi có khóa
 
@@ -55,7 +51,3 @@ Nếu đo có/không AI như hướng bài báo, chia điều kiện có đối 
 - Bản UI demo có thể thao tác nhưng chỉ dùng văn bản minh họa; không phải thí nghiệm người dùng đã thu thập.
 
 Nguồn bài báo: https://doi.org/10.1016/j.softx.2026.103072. Kiến trúc tham khảo: https://github.com/vdhong/AnnotaHub.
-
-## Ba thuật toán trong Studio v3
-
-Ngoài logistic regression, đã train thật Linear SVM (accuracy 87,9%, macro-F1 69,22365%) và Complement NB (accuracy 86,7%, macro-F1 69,49534%). Cùng clean split và protocol; báo cáo riêng trong artifacts. Khoảng chênh nhỏ chưa chứng minh ý nghĩa thống kê. UI chọn model và API theo dự án; benchmark lưu local_model_id để không gán kết quả cho model khác.

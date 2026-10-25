@@ -1,1 +1,660 @@
-[{"id": 1, "name": "TF-IDF ký tự + Logistic Regression", "algorithm": "logistic_regression", "state": "ready", "report": {"name": "TF-IDF ký tự + Logistic Regression", "dataset": "UIT-ViCTSD", "seed": 42, "selected_C": 8.0, "raw_counts": {"train": 7000, "validation": 2000, "test": 1000}, "counts": {"test": 1000, "validation": 1988, "train": 6943}, "removed_duplicates_or_overlaps": {"validation": 12, "train": 57}, "selection": "Chọn C bằng validation Macro-F1; không huấn luyện lại trên validation; test chỉ chấm cấu hình đã chọn.", "trials": [{"C": 0.5, "validation_macro_f1": 0.6685353985752768}, {"C": 2.0, "validation_macro_f1": 0.685029554377443}, {"C": 8.0, "validation_macro_f1": 0.6915398273752138}], "test": {"accuracy": 0.88, "precision": 0.6926590267397442, "recall": 0.6895812053115424, "macro_f1": 0.6911006085318012, "confusion_matrix": [[831, 59], [61, 49]], "per_class": {"NON_TOXIC": {"precision": 0.9316143497757847, "recall": 0.9337078651685393, "f1-score": 0.9326599326599326, "support": 890.0}, "TOXIC": {"precision": 0.4537037037037037, "recall": 0.44545454545454544, "f1-score": 0.44954128440366975, "support": 110.0}, "accuracy": 0.88, "macro avg": {"precision": 0.6926590267397442, "recall": 0.6895812053115424, "f1-score": 0.6911006085318012, "support": 1000.0}, "weighted avg": {"precision": 0.8790441787078559, "recall": 0.88, "f1-score": 0.8795168813517438, "support": 1000.0}}, "n": 1000}, "train_seconds": 10.156993644000067, "mean_prediction_ms": 0.19598299400013275, "source": "https://github.com/tarudesu/ViCTSD", "source_files_sha256": {"train": "a3e73479120738fb7965b01e23d5737c25c2cde909d7c3b5a6faf52d13a3b3f2", "validation": "e3950ee6a16375d566f58d3fc1206dab76fc8e41e340bb580ca0ae2e5ea61f83", "test": "e341013ca7441a5f2621b9347bd933f4d920d080b9931136ee8827d0ac0b2672"}, "scope": "Phân loại nhị phân trên ViCTSD; chưa chứng minh hiệu quả trên bình luận YouTube mới.", "majority_baseline": {"accuracy": 0.89, "precision": 0.445, "recall": 0.5, "macro_f1": 0.4708994708994709, "confusion_matrix": [[890, 0], [110, 0]], "per_class": {"NON_TOXIC": {"precision": 0.89, "recall": 1.0, "f1-score": 0.9417989417989417, "support": 890.0}, "TOXIC": {"precision": 0.0, "recall": 0.0, "f1-score": 0.0, "support": 110.0}, "accuracy": 0.89, "macro avg": {"precision": 0.445, "recall": 0.5, "f1-score": 0.4708994708994709, "support": 1000.0}, "weighted avg": {"precision": 0.7921, "recall": 0.89, "f1-score": 0.8382010582010582, "support": 1000.0}}, "n": 1000}, "source_commit": "e1ffb854ef7b7b7ae45a56d132c1f125e02e55e2"}, "asset": "model-1.json"}, {"id": 2, "name": "TF-IDF + Linear SVM", "algorithm": "linear_svm", "state": "ready", "report": {"name": "TF-IDF + Linear SVM", "algorithm": "linear_svm", "label_keys": ["NON_TOXIC", "TOXIC"], "selected_parameter": {"C": 0.5}, "dataset": "UIT-ViCTSD", "seed": 42, "selected_C": 0.5, "raw_counts": {"train": 7000, "validation": 2000, "test": 1000}, "counts": {"test": 1000, "validation": 1988, "train": 6943}, "removed_duplicates_or_overlaps": {"validation": 12, "train": 57}, "selection": "Chọn siêu tham số bằng validation Macro-F1; test chỉ chấm cấu hình đã chọn, không fit thêm validation.", "trials": [{"C": 0.5, "validation_macro_f1": 0.6837224517752324}, {"C": 2.0, "validation_macro_f1": 0.6625768134653393}, {"C": 8.0, "validation_macro_f1": 0.6635380819330912}], "test": {"accuracy": 0.879, "precision": 0.6914794434479474, "recall": 0.6930030643513789, "macro_f1": 0.6922364743017456, "confusion_matrix": [[829, 61], [60, 50]], "per_class": {"NON_TOXIC": {"precision": 0.9325084364454443, "recall": 0.9314606741573034, "f1-score": 0.9319842608206858, "support": 890.0}, "TOXIC": {"precision": 0.45045045045045046, "recall": 0.45454545454545453, "f1-score": 0.45248868778280543, "support": 110.0}, "accuracy": 0.879, "macro avg": {"precision": 0.6914794434479474, "recall": 0.6930030643513789, "f1-score": 0.6922364743017456, "support": 1000.0}, "weighted avg": {"precision": 0.879482057985995, "recall": 0.879, "f1-score": 0.8792397477865189, "support": 1000.0}}, "n": 1000}, "majority_baseline": {"accuracy": 0.89, "precision": 0.445, "recall": 0.5, "macro_f1": 0.4708994708994709, "confusion_matrix": [[890, 0], [110, 0]], "per_class": {"NON_TOXIC": {"precision": 0.89, "recall": 1.0, "f1-score": 0.9417989417989417, "support": 890.0}, "TOXIC": {"precision": 0.0, "recall": 0.0, "f1-score": 0.0, "support": 110.0}, "accuracy": 0.89, "macro avg": {"precision": 0.445, "recall": 0.5, "f1-score": 0.4708994708994709, "support": 1000.0}, "weighted avg": {"precision": 0.7921, "recall": 0.89, "f1-score": 0.8382010582010582, "support": 1000.0}}, "n": 1000}, "train_seconds": 11.541573058999347, "mean_prediction_ms": 0.28811145200052124, "source": "https://github.com/tarudesu/ViCTSD", "source_files_sha256": {"train": "a3e73479120738fb7965b01e23d5737c25c2cde909d7c3b5a6faf52d13a3b3f2", "validation": "e3950ee6a16375d566f58d3fc1206dab76fc8e41e340bb580ca0ae2e5ea61f83", "test": "e341013ca7441a5f2621b9347bd933f4d920d080b9931136ee8827d0ac0b2672"}, "scope": "Kết quả chỉ áp dụng trên tập test đã cung cấp; chưa chứng minh tổng quát hóa sang nguồn khác."}, "asset": "model-2.json"}, {"id": 3, "name": "TF-IDF + Complement Naive Bayes", "algorithm": "complement_nb", "state": "ready", "report": {"name": "TF-IDF + Complement Naive Bayes", "algorithm": "complement_nb", "label_keys": ["NON_TOXIC", "TOXIC"], "selected_parameter": {"alpha": 0.1}, "dataset": "UIT-ViCTSD", "seed": 42, "selected_C": null, "raw_counts": {"train": 7000, "validation": 2000, "test": 1000}, "counts": {"test": 1000, "validation": 1988, "train": 6943}, "removed_duplicates_or_overlaps": {"validation": 12, "train": 57}, "selection": "Chọn siêu tham số bằng validation Macro-F1; test chỉ chấm cấu hình đã chọn, không fit thêm validation.", "trials": [{"alpha": 0.1, "validation_macro_f1": 0.670403728099655}, {"alpha": 0.5, "validation_macro_f1": 0.5389035885187048}, {"alpha": 1.0, "validation_macro_f1": 0.5030272246042298}], "test": {"accuracy": 0.867, "precision": 0.6784356486935887, "recall": 0.7181307456588355, "macro_f1": 0.6949534287922678, "confusion_matrix": [[809, 81], [52, 58]], "per_class": {"NON_TOXIC": {"precision": 0.9396051103368177, "recall": 0.9089887640449438, "f1-score": 0.9240434037692747, "support": 890.0}, "TOXIC": {"precision": 0.4172661870503597, "recall": 0.5272727272727272, "f1-score": 0.46586345381526106, "support": 110.0}, "accuracy": 0.867, "macro avg": {"precision": 0.6784356486935887, "recall": 0.7181307456588355, "f1-score": 0.6949534287922678, "support": 1000.0}, "weighted avg": {"precision": 0.8821478287753074, "recall": 0.867, "f1-score": 0.8736436092743333, "support": 1000.0}}, "n": 1000}, "majority_baseline": {"accuracy": 0.89, "precision": 0.445, "recall": 0.5, "macro_f1": 0.4708994708994709, "confusion_matrix": [[890, 0], [110, 0]], "per_class": {"NON_TOXIC": {"precision": 0.89, "recall": 1.0, "f1-score": 0.9417989417989417, "support": 890.0}, "TOXIC": {"precision": 0.0, "recall": 0.0, "f1-score": 0.0, "support": 110.0}, "accuracy": 0.89, "macro avg": {"precision": 0.445, "recall": 0.5, "f1-score": 0.4708994708994709, "support": 1000.0}, "weighted avg": {"precision": 0.7921, "recall": 0.89, "f1-score": 0.8382010582010582, "support": 1000.0}}, "n": 1000}, "train_seconds": 11.283913255998414, "mean_prediction_ms": 0.23769629900016298, "source": "https://github.com/tarudesu/ViCTSD", "source_files_sha256": {"train": "a3e73479120738fb7965b01e23d5737c25c2cde909d7c3b5a6faf52d13a3b3f2", "validation": "e3950ee6a16375d566f58d3fc1206dab76fc8e41e340bb580ca0ae2e5ea61f83", "test": "e341013ca7441a5f2621b9347bd933f4d920d080b9931136ee8827d0ac0b2672"}, "scope": "Kết quả chỉ áp dụng trên tập test đã cung cấp; chưa chứng minh tổng quát hóa sang nguồn khác."}, "asset": "model-3.json"}]
+[
+  {
+    "id": 1,
+    "name": "PhoBERT-base",
+    "algorithm": "transformer_bio",
+    "backend_required": true,
+    "report": {
+      "task": "token_classification",
+      "counts": {
+        "train": 8844
+      },
+      "span_metrics": {
+        "partial": {
+          "precision": 0.7358,
+          "recall": 0.748,
+          "f1": 0.7419,
+          "tp": 947,
+          "fp": 340,
+          "fn": 319
+        },
+        "strict": {
+          "precision": 0.4965,
+          "recall": 0.5047,
+          "f1": 0.5006,
+          "tp": 639,
+          "fp": 648,
+          "fn": 627
+        },
+        "char": {
+          "precision": 0.737,
+          "recall": 0.5909,
+          "f1": 0.6559
+        }
+      },
+      "original_metrics": {
+        "variant": "syllable",
+        "model": "vinai/phobert-base",
+        "epochs": 5,
+        "lr": 2e-05,
+        "batch_size": 32,
+        "seed": 42,
+        "n_train": 8844,
+        "best_dev_span_f1_partial": 0.7619,
+        "dev_best": {
+          "partial": {
+            "precision": 0.7614,
+            "recall": 0.7556,
+            "f1": 0.7585,
+            "tp": 986,
+            "fp": 309,
+            "fn": 319
+          },
+          "strict": {
+            "precision": 0.5359,
+            "recall": 0.5318,
+            "f1": 0.5338,
+            "tp": 694,
+            "fp": 601,
+            "fn": 611
+          },
+          "char": {
+            "precision": 0.7229,
+            "recall": 0.5489,
+            "f1": 0.624
+          }
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "train_loss": 0.555,
+            "dev": {
+              "partial": {
+                "precision": 0.713,
+                "recall": 0.6797,
+                "f1": 0.696,
+                "tp": 887,
+                "fp": 357,
+                "fn": 418
+              },
+              "strict": {
+                "precision": 0.4831,
+                "recall": 0.4605,
+                "f1": 0.4716,
+                "tp": 601,
+                "fp": 643,
+                "fn": 704
+              },
+              "char": {
+                "precision": 0.7659,
+                "recall": 0.4244,
+                "f1": 0.5462
+              }
+            }
+          },
+          {
+            "epoch": 2,
+            "train_loss": 0.3576,
+            "dev": {
+              "partial": {
+                "precision": 0.7794,
+                "recall": 0.7203,
+                "f1": 0.7487,
+                "tp": 940,
+                "fp": 266,
+                "fn": 365
+              },
+              "strict": {
+                "precision": 0.5265,
+                "recall": 0.4866,
+                "f1": 0.5058,
+                "tp": 635,
+                "fp": 571,
+                "fn": 670
+              },
+              "char": {
+                "precision": 0.7539,
+                "recall": 0.4996,
+                "f1": 0.601
+              }
+            }
+          },
+          {
+            "epoch": 3,
+            "train_loss": 0.305,
+            "dev": {
+              "partial": {
+                "precision": 0.7724,
+                "recall": 0.7517,
+                "f1": 0.7619,
+                "tp": 981,
+                "fp": 289,
+                "fn": 324
+              },
+              "strict": {
+                "precision": 0.552,
+                "recall": 0.5372,
+                "f1": 0.5445,
+                "tp": 701,
+                "fp": 569,
+                "fn": 604
+              },
+              "char": {
+                "precision": 0.764,
+                "recall": 0.5214,
+                "f1": 0.6198
+              }
+            }
+          },
+          {
+            "epoch": 4,
+            "train_loss": 0.2627,
+            "dev": {
+              "partial": {
+                "precision": 0.7693,
+                "recall": 0.7487,
+                "f1": 0.7588,
+                "tp": 977,
+                "fp": 293,
+                "fn": 328
+              },
+              "strict": {
+                "precision": 0.5488,
+                "recall": 0.5341,
+                "f1": 0.5414,
+                "tp": 697,
+                "fp": 573,
+                "fn": 608
+              },
+              "char": {
+                "precision": 0.7542,
+                "recall": 0.5297,
+                "f1": 0.6224
+              }
+            }
+          },
+          {
+            "epoch": 5,
+            "train_loss": 0.2438,
+            "dev": {
+              "partial": {
+                "precision": 0.7614,
+                "recall": 0.7556,
+                "f1": 0.7585,
+                "tp": 986,
+                "fp": 309,
+                "fn": 319
+              },
+              "strict": {
+                "precision": 0.5359,
+                "recall": 0.5318,
+                "f1": 0.5338,
+                "tp": 694,
+                "fp": 601,
+                "fn": 611
+              },
+              "char": {
+                "precision": 0.7229,
+                "recall": 0.5489,
+                "f1": 0.624
+              }
+            }
+          }
+        ],
+        "test": {
+          "partial": {
+            "precision": 0.7358,
+            "recall": 0.748,
+            "f1": 0.7419,
+            "tp": 947,
+            "fp": 340,
+            "fn": 319
+          },
+          "strict": {
+            "precision": 0.4965,
+            "recall": 0.5047,
+            "f1": 0.5006,
+            "tp": 639,
+            "fp": 648,
+            "fn": 627
+          },
+          "char": {
+            "precision": 0.737,
+            "recall": 0.5909,
+            "f1": 0.6559
+          }
+        },
+        "test_word_segment": null
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "XLM-R base",
+    "algorithm": "transformer_bio",
+    "backend_required": true,
+    "report": {
+      "task": "token_classification",
+      "counts": {
+        "train": 8844
+      },
+      "span_metrics": {
+        "partial": {
+          "precision": 0.7661,
+          "recall": 0.7915,
+          "f1": 0.7786,
+          "tp": 1002,
+          "fp": 306,
+          "fn": 264
+        },
+        "strict": {
+          "precision": 0.5313,
+          "recall": 0.549,
+          "f1": 0.54,
+          "tp": 695,
+          "fp": 613,
+          "fn": 571
+        },
+        "char": {
+          "precision": 0.7375,
+          "recall": 0.6391,
+          "f1": 0.6848
+        }
+      },
+      "original_metrics": {
+        "variant": "syllable",
+        "model": "xlm-roberta-base",
+        "epochs": 5,
+        "lr": 3e-05,
+        "batch_size": 16,
+        "seed": 42,
+        "n_train": 8844,
+        "best_dev_span_f1_partial": 0.7971,
+        "dev_best": {
+          "partial": {
+            "precision": 0.7902,
+            "recall": 0.8041,
+            "f1": 0.7971,
+            "tp": 1047,
+            "fp": 278,
+            "fn": 255
+          },
+          "strict": {
+            "precision": 0.5909,
+            "recall": 0.6014,
+            "f1": 0.5961,
+            "tp": 783,
+            "fp": 542,
+            "fn": 519
+          },
+          "char": {
+            "precision": 0.755,
+            "recall": 0.5929,
+            "f1": 0.6642
+          }
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "train_loss": 0.491,
+            "dev": {
+              "partial": {
+                "precision": 0.8175,
+                "recall": 0.7089,
+                "f1": 0.7594,
+                "tp": 923,
+                "fp": 206,
+                "fn": 379
+              },
+              "strict": {
+                "precision": 0.5766,
+                "recall": 0.5,
+                "f1": 0.5356,
+                "tp": 651,
+                "fp": 478,
+                "fn": 651
+              },
+              "char": {
+                "precision": 0.8326,
+                "recall": 0.4535,
+                "f1": 0.5872
+              }
+            }
+          },
+          {
+            "epoch": 2,
+            "train_loss": 0.3328,
+            "dev": {
+              "partial": {
+                "precision": 0.794,
+                "recall": 0.7757,
+                "f1": 0.7848,
+                "tp": 1010,
+                "fp": 262,
+                "fn": 292
+              },
+              "strict": {
+                "precision": 0.5755,
+                "recall": 0.5622,
+                "f1": 0.5688,
+                "tp": 732,
+                "fp": 540,
+                "fn": 570
+              },
+              "char": {
+                "precision": 0.788,
+                "recall": 0.5341,
+                "f1": 0.6367
+              }
+            }
+          },
+          {
+            "epoch": 3,
+            "train_loss": 0.2578,
+            "dev": {
+              "partial": {
+                "precision": 0.7693,
+                "recall": 0.8118,
+                "f1": 0.79,
+                "tp": 1057,
+                "fp": 317,
+                "fn": 245
+              },
+              "strict": {
+                "precision": 0.575,
+                "recall": 0.6068,
+                "f1": 0.5904,
+                "tp": 790,
+                "fp": 584,
+                "fn": 512
+              },
+              "char": {
+                "precision": 0.7529,
+                "recall": 0.5861,
+                "f1": 0.6591
+              }
+            }
+          },
+          {
+            "epoch": 4,
+            "train_loss": 0.191,
+            "dev": {
+              "partial": {
+                "precision": 0.7785,
+                "recall": 0.8018,
+                "f1": 0.79,
+                "tp": 1044,
+                "fp": 297,
+                "fn": 258
+              },
+              "strict": {
+                "precision": 0.5757,
+                "recall": 0.5929,
+                "f1": 0.5842,
+                "tp": 772,
+                "fp": 569,
+                "fn": 530
+              },
+              "char": {
+                "precision": 0.7452,
+                "recall": 0.5968,
+                "f1": 0.6628
+              }
+            }
+          },
+          {
+            "epoch": 5,
+            "train_loss": 0.1539,
+            "dev": {
+              "partial": {
+                "precision": 0.7902,
+                "recall": 0.8041,
+                "f1": 0.7971,
+                "tp": 1047,
+                "fp": 278,
+                "fn": 255
+              },
+              "strict": {
+                "precision": 0.5909,
+                "recall": 0.6014,
+                "f1": 0.5961,
+                "tp": 783,
+                "fp": 542,
+                "fn": 519
+              },
+              "char": {
+                "precision": 0.755,
+                "recall": 0.5929,
+                "f1": 0.6642
+              }
+            }
+          }
+        ],
+        "test": {
+          "partial": {
+            "precision": 0.7661,
+            "recall": 0.7915,
+            "f1": 0.7786,
+            "tp": 1002,
+            "fp": 306,
+            "fn": 264
+          },
+          "strict": {
+            "precision": 0.5313,
+            "recall": 0.549,
+            "f1": 0.54,
+            "tp": 695,
+            "fp": 613,
+            "fn": 571
+          },
+          "char": {
+            "precision": 0.7375,
+            "recall": 0.6391,
+            "f1": 0.6848
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": 3,
+    "name": "XLM-R large",
+    "algorithm": "transformer_bio",
+    "backend_required": true,
+    "report": {
+      "task": "token_classification",
+      "counts": {
+        "train": 8844
+      },
+      "span_metrics": {
+        "partial": {
+          "precision": 0.7792,
+          "recall": 0.7859,
+          "f1": 0.7825,
+          "tp": 995,
+          "fp": 282,
+          "fn": 271
+        },
+        "strict": {
+          "precision": 0.5482,
+          "recall": 0.5529,
+          "f1": 0.5505,
+          "tp": 700,
+          "fp": 577,
+          "fn": 566
+        },
+        "char": {
+          "precision": 0.7921,
+          "recall": 0.6308,
+          "f1": 0.7023
+        }
+      },
+      "original_metrics": {
+        "variant": "syllable",
+        "model": "xlm-roberta-large",
+        "epochs": 4,
+        "lr": 1e-05,
+        "batch_size": 8,
+        "seed": 42,
+        "n_train": 8844,
+        "best_dev_span_f1_partial": 0.7873,
+        "dev_best": {
+          "partial": {
+            "precision": 0.7713,
+            "recall": 0.7796,
+            "f1": 0.7754,
+            "tp": 1015,
+            "fp": 301,
+            "fn": 287
+          },
+          "strict": {
+            "precision": 0.5547,
+            "recall": 0.5607,
+            "f1": 0.5577,
+            "tp": 730,
+            "fp": 586,
+            "fn": 572
+          },
+          "char": {
+            "precision": 0.7591,
+            "recall": 0.5896,
+            "f1": 0.6637
+          }
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "train_loss": 0.5313,
+            "dev": {
+              "partial": {
+                "precision": 0.7218,
+                "recall": 0.7773,
+                "f1": 0.7485,
+                "tp": 1012,
+                "fp": 390,
+                "fn": 290
+              },
+              "strict": {
+                "precision": 0.49,
+                "recall": 0.5276,
+                "f1": 0.5081,
+                "tp": 687,
+                "fp": 715,
+                "fn": 615
+              },
+              "char": {
+                "precision": 0.7073,
+                "recall": 0.5852,
+                "f1": 0.6404
+              }
+            }
+          },
+          {
+            "epoch": 2,
+            "train_loss": 0.3207,
+            "dev": {
+              "partial": {
+                "precision": 0.798,
+                "recall": 0.7465,
+                "f1": 0.7714,
+                "tp": 972,
+                "fp": 246,
+                "fn": 330
+              },
+              "strict": {
+                "precision": 0.5649,
+                "recall": 0.5284,
+                "f1": 0.546,
+                "tp": 688,
+                "fp": 530,
+                "fn": 614
+              },
+              "char": {
+                "precision": 0.7822,
+                "recall": 0.5579,
+                "f1": 0.6513
+              }
+            }
+          },
+          {
+            "epoch": 3,
+            "train_loss": 0.2562,
+            "dev": {
+              "partial": {
+                "precision": 0.7959,
+                "recall": 0.7788,
+                "f1": 0.7873,
+                "tp": 1014,
+                "fp": 260,
+                "fn": 288
+              },
+              "strict": {
+                "precision": 0.5824,
+                "recall": 0.5699,
+                "f1": 0.5761,
+                "tp": 742,
+                "fp": 532,
+                "fn": 560
+              },
+              "char": {
+                "precision": 0.8,
+                "recall": 0.5671,
+                "f1": 0.6637
+              }
+            }
+          },
+          {
+            "epoch": 4,
+            "train_loss": 0.212,
+            "dev": {
+              "partial": {
+                "precision": 0.7713,
+                "recall": 0.7796,
+                "f1": 0.7754,
+                "tp": 1015,
+                "fp": 301,
+                "fn": 287
+              },
+              "strict": {
+                "precision": 0.5547,
+                "recall": 0.5607,
+                "f1": 0.5577,
+                "tp": 730,
+                "fp": 586,
+                "fn": 572
+              },
+              "char": {
+                "precision": 0.7591,
+                "recall": 0.5896,
+                "f1": 0.6637
+              }
+            }
+          }
+        ],
+        "test": {
+          "partial": {
+            "precision": 0.7792,
+            "recall": 0.7859,
+            "f1": 0.7825,
+            "tp": 995,
+            "fp": 282,
+            "fn": 271
+          },
+          "strict": {
+            "precision": 0.5482,
+            "recall": 0.5529,
+            "f1": 0.5505,
+            "tp": 700,
+            "fp": 577,
+            "fn": 566
+          },
+          "char": {
+            "precision": 0.7921,
+            "recall": 0.6308,
+            "f1": 0.7023
+          }
+        }
+      }
+    }
+  }
+]

@@ -4,6 +4,6 @@
 
 Repo không chứa `.venv`, `.env.local`, database, dữ liệu người dùng hoặc bộ model Transformer dung lượng lớn. Các file này vẫn được giữ trên máy gốc.
 
-Để dùng PhoBERT/XLM-R offline, chép bộ model tương ứng vào `backend/artifacts/transformers/` từ bản dự án đầy đủ, rồi làm theo `MODELS_VI.md` để kiểm tra và đăng ký model. Source trên GitHub không tự tải các trọng số này.
+Để dùng PhoBERT/XLM-R offline, tải `vihos-models-full.zip` theo link trong `MODELS_VI.md`, đặt ba thư mục model vào `backend/artifacts/transformers/vihos-full/`, rồi kiểm tra và đăng ký model theo hướng dẫn đó. Source trên GitHub không tự tải các trọng số này.
 
 Không chia sẻ `.env.local` hoặc thư mục `backend/private_data/` khi chuyển dự án sang máy khác.

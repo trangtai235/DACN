@@ -32,7 +32,10 @@ def bio_spans(words,tags):
 
 def load_model(path):
     global _loaded
-    if _loaded and _loaded[0]==str(path):return _loaded[1:]
+    path=Path(path)
+    files=sorted(p for p in path.iterdir() if p.is_file() and p.name not in ('metrics.json','verified.json'))
+    cache_key=(str(path),tuple((p.name,p.stat().st_size,p.stat().st_mtime_ns) for p in files))
+    if _loaded and _loaded[0]==cache_key:return _loaded[1:]
     try:
         import torch
         from transformers import AutoModelForTokenClassification,AutoTokenizer
@@ -46,7 +49,7 @@ def load_model(path):
         raise ValueError('Trọng số không khớp cấu hình model; không dùng trọng số khởi tạo ngẫu nhiên.')
     if set(model.config.id2label.values())!={'O','B-T','I-T'}:raise ValueError('Model cần bộ nhãn BIO: O, B-T, I-T.')
     model.eval()
-    _loaded=(str(path),tokenizer,model,torch)
+    _loaded=(cache_key,tokenizer,model,torch)
     return tokenizer,model,torch
 
 def predict(run,texts):

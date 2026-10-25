@@ -1,8 +1,7 @@
 /** Browser-only synthetic workspace. No passwords, remote requests or fabricated training/API scores. */
-import {state,T} from './state.js?v=2a0a4e3abb7b';
-import {portablePredict} from './inference.js?v=2a0a4e3abb7b';
-import {formatExport} from './exporters.js?v=2a0a4e3abb7b';
-const KEY='annotaflow.studio.v3';let db,catalog,loaded=new Map();
+import {state,T} from './state.js?v=9d97c650b6d2';
+import {formatExport} from './exporters.js?v=9d97c650b6d2';
+const KEY='annotaflow.studio.v3';let db,catalog;
 const members=[{id:1,username:'tv1',name:'Minh Anh',role:'manager'},{id:2,username:'tv2',name:'Quốc Bảo',role:'annotator'},{id:3,username:'tv3',name:'Khánh Linh',role:'annotator'}];
 const now=()=>new Date().toISOString();const clone=o=>JSON.parse(JSON.stringify(o));
 const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
@@ -17,7 +16,7 @@ function defaults(project){
 function writable(p){defaults(p);if(db.prefs[p].locked||db.prefs[p].archived)throw new Error('Dự án đã khóa/lưu trữ. Mở lại trong Cài đặt dự án.');}
 export async function initDemo(){
  if(db)return;
- const rows=await fetch('/assets/demo-data.json').then(r=>r.json());catalog=[];
+ const rows=await fetch('/assets/demo-data.json').then(r=>r.json());catalog=await fetch('/assets/model-catalog.json').then(r=>r.json());
  try{db=JSON.parse(localStorage.getItem(KEY));}catch{}
  if(!db||db.version!==3){
   let old;try{old=JSON.parse(localStorage.getItem('annotaflow.workspace.v4'));}catch{}
@@ -28,10 +27,8 @@ export async function initDemo(){
   save();
  }
 }
-async function predictLocal(texts,id){
- let m=loaded.get(id);if(!m){const meta=catalog.find(m=>m.id===Number(id))||catalog[0];m=await fetch('/assets/'+meta.asset).then(r=>r.json());loaded.set(id,m);}
- return portablePredict(m,texts);
-}
+async function predictLocal(){return native();}
+
 function group(ai,human){return {'TOXIC_TOXIC':'A','NON_TOXIC_NON_TOXIC':'B','NON_TOXIC_TOXIC':'C','TOXIC_NON_TOXIC':'D'}[ai+'_'+human]||'';}
 function runsFor(p){return db.runs.filter(r=>r.project===p).map(r=>{const ts=db.tasks.filter(t=>t.run_id===r.id);const stats=Object.fromEntries('ABCD'.split('').map(g=>[g,{n:0,changed:0,seconds:0,score:.0075}]));for(const t of ts.filter(t=>t.state==='complete')){const c=db.comments.find(c=>c.id===t.comment_id);const s=stats[c.group];if(s){s.n++;s.changed+=Number(t.final_label!==c.first_label);s.seconds+=t.seconds||0;}}for(const s of Object.values(stats))s.score=(s.changed+.75)/(s.seconds+100);return {...r,stats,completed:ts.filter(t=>t.state==='complete').length,conflicts:ts.filter(t=>t.state==='conflict').length};});}
 function bootstrap(p){

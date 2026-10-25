@@ -6,13 +6,13 @@ AnnotaFlow/
     index.html
     src/
       app.js                    router, shell, event delegation
-      core/                     state, API client, UI helpers, portable inference
+      core/                     state, API client, UI helpers, backend inference integration
       features/
         auth/ projects/ overview/ datasets/ annotation/ research/
         models/ evaluation/ quality/ versions/ exports/
         members/ project-settings/ account/
       styles/                   base, theme, auth, studio
-    public/                     synthetic demo + 3 portable model weights
+    public/                     synthetic demo + Transformer model reports
   backend/
     config/                     Django settings, URLs, WSGI
     core/

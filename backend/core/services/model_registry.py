@@ -1,14 +1,18 @@
 ﻿"""Register verified, complete Transformer artifacts; retire legacy choices."""
 import json
 from django.conf import settings
+from django.db import transaction
 from experiments.models import ModelRun
 
+BUNDLED_MODELS = [('phobert-base','PhoBERT-base'),('xlmr-base','XLM-R base'),('xlmr-large','XLM-R large')]
+BUNDLE_DIRECTORY = 'vihos-full'
+@transaction.atomic
 def register_bundled(project):
     from studio.services.projects import ensure
     prefs=ensure(project)
-    root=settings.BASE_DIR/'artifacts'/'transformers'
+    root=settings.BASE_DIR/'artifacts'/'transformers'/BUNDLE_DIRECTORY
     ready=[]
-    for key,name in [('phobert-base','PhoBERT-base'),('xlmr-large','XLM-R large')]:
+    for key,name in BUNDLED_MODELS:
         path=root/key
         marker=path/'verified.json'
         if not marker.exists():continue
@@ -19,6 +23,7 @@ def register_bundled(project):
         model,_=ModelRun.objects.update_or_create(project=project,algorithm='transformer_bio',artifact_path=str(path),defaults={'name':name,'state':'ready','report':json.dumps(report,ensure_ascii=False)})
         ready.append(model)
     if ready:
-        ModelRun.objects.filter(project=project).exclude(algorithm='transformer_bio').update(state='retired')
-        if not prefs.active_model_id or prefs.active_model.state!='ready':
+        ready_ids=[model.pk for model in ready]
+        ModelRun.objects.filter(project=project).exclude(pk__in=ready_ids).update(state='retired')
+        if prefs.active_model_id not in ready_ids:
             prefs.active_model=ready[0];prefs.save(update_fields=['active_model'])

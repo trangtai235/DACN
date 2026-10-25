@@ -1,5 +1,5 @@
-import {state} from '../../core/state.js?v=2a0a4e3abb7b';
-import {T,esc,icon,heading,btn,num,pct} from '../../core/ui.js?v=2a0a4e3abb7b';
+import {state} from '../../core/state.js?v=9d97c650b6d2';
+import {T,esc,icon,heading,btn,num,pct} from '../../core/ui.js?v=9d97c650b6d2';
 export async function load(){}
 export function render(){
  const s=state.workspace,total=s.stats.total||0,done=s.annotation_stats?.annotated_comments||0;

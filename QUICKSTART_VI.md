@@ -60,7 +60,7 @@ Mật khẩu quản trị được lưu riêng ở `backend/private_data/postgre
 
 Huấn luyện mới cần 3 CSV UTF-8 riêng `text,label` (hoặc `Comment,Toxicity`). Label là key dự án hoặc chỉ số lớp theo thứ tự hiển thị. Mỗi split cần đủ lớp; loại giao nhau có thể làm thiếu lớp và job sẽ báo lỗi. Tập test không dùng fit/chọn cấu hình.
 
-Chọn Logistic Regression, Linear SVM hoặc Complement NB trong UI. Model TF-IDF chỉ học nhãn câu, không học spans. Model nhiều lớp chạy ở backend; portable online chỉ hỗ trợ 3 artifact nhị phân có sẵn.
+Ba model có sẵn là PhoBERT-base, XLM-R base và XLM-R large; xem `MODELS_VI.md` để cài trọng số từ bộ Drive. Chúng dự đoán spans BIO trên backend. Mã huấn luyện TF-IDF vẫn hỗ trợ thí nghiệm riêng với dữ liệu CSV; các trọng số TF-IDF cũ đã được bỏ khỏi bộ bàn giao. Bản demo tĩnh không chạy Transformer trong trình duyệt.
 
 Chấm API baseline cần tải đúng ViCTSD test về máy:
 

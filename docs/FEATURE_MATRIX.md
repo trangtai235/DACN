@@ -14,7 +14,7 @@ Tham khảo AnnotaHub README + code đã đọc tại commit `7fc2689e535f21604b
 | Agreement/conflicts/gold | Có | Tính trên dữ liệu demo |
 | Dataset versions/restore | Có, nhãn người/gold cùng ID + text | Có cho lớp nhãn demo |
 | 16 exports/scopes/history | Có, checksum/private file + history | 16 formats; không audit server |
-| Local model selection/inference | 3 model có sẵn + model train mới | 3 model nhị phân có trọng số thật |
+| Local model selection/inference | PhoBERT-base, XLM-R base, XLM-R large | Xem báo cáo; suy luận cần backend |
 | Train algorithm selector | 3 thuật toán sklearn, CSV3split | Chỉ cấu hình, chạy mới cần backend |
 | Gemini/Ollama/OpenAI-compatible | Adapter thật, configurable | Không nhận key/gọi API |
 | Paired model/API evaluation | Có, chi phí ước tính, pin artifact/schema | Metrics local có thật; API chưa đo |

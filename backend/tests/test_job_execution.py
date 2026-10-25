@@ -6,6 +6,7 @@ from core.models import Project, Membership, Source, Comment, Job, Prediction
 from core.jobs.runner import execute
 from experiments.models import ModelRun
 from studio.services.projects import ensure
+from tests.model_fixture import local_model_fixture
 
 
 class JobExecutionTests(TransactionTestCase):
@@ -18,12 +19,12 @@ class JobExecutionTests(TransactionTestCase):
         ensure(project)
         source = Source.objects.create(project=project, name='Test source')
         Comment.objects.create(project=project, source=source, text='A test comment')
-        root = settings.BASE_DIR / 'artifacts/victsd-logreg-v1'
-        ModelRun.objects.create(project=project, name='Baseline', artifact_path=str(root),
-                                report=(root / 'metrics.json').read_text(encoding='utf-8'))
-        job = Job.objects.create(project=project, actor=user, kind='predict',
-                                 payload=json.dumps({'provider': 'local', 'replace_ai': True}))
-        execute(job.id)
+        with local_model_fixture() as (root, report):
+            ModelRun.objects.create(project=project, name='Synthetic test model', artifact_path=str(root),
+                                    report=json.dumps(report))
+            job = Job.objects.create(project=project, actor=user, kind='predict',
+                                     payload=json.dumps({'provider': 'local', 'replace_ai': True}))
+            execute(job.id)
         job.refresh_from_db()
         self.assertEqual(job.status, 'complete', job.message)
         self.assertEqual(Prediction.objects.filter(comment__project=project).count(), 1)
