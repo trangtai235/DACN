@@ -1,0 +1,16 @@
+.modal:has(.import-dialog){width:min(580px,calc(100vw - 32px));max-width:580px;border-radius:16px;border:1px solid #e4e8ee;box-shadow:0 24px 80px #152b4526}
+.modal:has(.import-dialog) .modal-head{padding:22px 26px;border-bottom:1px solid #edf0f4}
+.modal:has(.import-dialog) .modal-head h2{font-size:19px;font-weight:650;letter-spacing:-.3px;color:#1c2c41}
+.modal:has(.import-dialog) .modal-head .icon-btn{width:34px;min-height:34px;padding:7px;border-color:transparent;background:#f5f7fa;border-radius:8px;color:#64748b}
+.modal:has(.import-dialog) .modal-body{padding:24px 26px 0}
+.import-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:#f2f4f7;border-radius:10px;margin-bottom:26px}
+.import-methods .btn{justify-content:center;gap:8px;border:0;background:transparent;color:#657184;min-height:42px;border-radius:7px;font-size:13px;font-weight:550;box-shadow:none}
+.import-methods .btn.active{background:#fff;color:#245d98;box-shadow:0 1px 4px #162d4514}
+.import-dialog .form-row{margin-bottom:20px}.import-dialog .form-row label{font-size:13px;font-weight:550;color:#344256;margin-bottom:8px}
+.import-dialog input:not([type=checkbox]),.import-dialog textarea{border:1px solid #dce2e9;border-radius:8px;background:#fff;font-size:14px;padding:11px 13px;min-height:44px;color:#243347}
+.import-dialog input::placeholder,.import-dialog textarea::placeholder{color:#94a0b0;font-size:13px}.import-dialog input:focus,.import-dialog textarea:focus{border-color:#4b82bb;outline:3px solid #e6eff9;outline-offset:0}
+.import-options{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center}.import-dialog .import-checkbox{display:flex;align-items:center;justify-content:flex-start;gap:10px;font-size:13px;font-weight:450;color:#44536a;margin:9px 0 0;cursor:pointer}
+.import-dialog .import-checkbox input,.youtube-import input[type=checkbox]{width:17px;height:17px;min-width:17px;flex:0 0 17px;margin:0;padding:0;accent-color:#2867a6}
+.import-mapping{margin-bottom:20px;border:1px solid #e5e9ef;border-radius:8px;padding:13px}.import-mapping summary{font-size:13px;color:#56667c;cursor:pointer}.import-mapping[open] summary{margin-bottom:18px}
+.import-dialog .modal-actions{margin:6px -26px 0;padding:18px 26px;border-top:1px solid #edf0f4;background:#fbfcfd;gap:10px}.import-dialog .modal-actions .btn{min-height:42px;border-radius:8px;padding:10px 18px;font-size:13px}.import-dialog .modal-actions .primary{background:#2867a6;border-color:#2867a6}.import-dialog .modal-actions .primary:hover{background:#205688}
+@media(max-width:480px){.modal:has(.import-dialog) .modal-head{padding:20px}.modal:has(.import-dialog) .modal-body{padding:20px 20px 0}.import-dialog .modal-actions{margin-left:-20px;margin-right:-20px;padding:16px 20px}.import-options{grid-template-columns:1fr;gap:0}.import-dialog .import-checkbox{margin:0 0 20px}.import-methods .btn{gap:5px;padding:8px;font-size:12px}}

@@ -1,0 +1,7 @@
+{
+  "version": "Studio 3",
+  "commit": "f22a7d331fac5b8fbf070c20d8c03949f5c3d547",
+  "backend_database": "PostgreSQL 15",
+  "online_mode": "static synthetic demo",
+  "native_start": "RUN_NATIVE_WINDOWS.bat"
+}

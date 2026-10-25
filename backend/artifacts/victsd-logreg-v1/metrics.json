@@ -1,0 +1,133 @@
+{
+  "name": "TF-IDF ký tự + Logistic Regression",
+  "dataset": "UIT-ViCTSD",
+  "seed": 42,
+  "selected_C": 8.0,
+  "raw_counts": {
+    "train": 7000,
+    "validation": 2000,
+    "test": 1000
+  },
+  "counts": {
+    "test": 1000,
+    "validation": 1988,
+    "train": 6943
+  },
+  "removed_duplicates_or_overlaps": {
+    "validation": 12,
+    "train": 57
+  },
+  "selection": "Chọn C bằng validation Macro-F1; không huấn luyện lại trên validation; test chỉ chấm cấu hình đã chọn.",
+  "trials": [
+    {
+      "C": 0.5,
+      "validation_macro_f1": 0.6685353985752768
+    },
+    {
+      "C": 2.0,
+      "validation_macro_f1": 0.685029554377443
+    },
+    {
+      "C": 8.0,
+      "validation_macro_f1": 0.6915398273752138
+    }
+  ],
+  "test": {
+    "accuracy": 0.88,
+    "precision": 0.6926590267397442,
+    "recall": 0.6895812053115424,
+    "macro_f1": 0.6911006085318012,
+    "confusion_matrix": [
+      [
+        831,
+        59
+      ],
+      [
+        61,
+        49
+      ]
+    ],
+    "per_class": {
+      "NON_TOXIC": {
+        "precision": 0.9316143497757847,
+        "recall": 0.9337078651685393,
+        "f1-score": 0.9326599326599326,
+        "support": 890.0
+      },
+      "TOXIC": {
+        "precision": 0.4537037037037037,
+        "recall": 0.44545454545454544,
+        "f1-score": 0.44954128440366975,
+        "support": 110.0
+      },
+      "accuracy": 0.88,
+      "macro avg": {
+        "precision": 0.6926590267397442,
+        "recall": 0.6895812053115424,
+        "f1-score": 0.6911006085318012,
+        "support": 1000.0
+      },
+      "weighted avg": {
+        "precision": 0.8790441787078559,
+        "recall": 0.88,
+        "f1-score": 0.8795168813517438,
+        "support": 1000.0
+      }
+    },
+    "n": 1000
+  },
+  "train_seconds": 10.156993644000067,
+  "mean_prediction_ms": 0.19598299400013275,
+  "source": "https://github.com/tarudesu/ViCTSD",
+  "source_files_sha256": {
+    "train": "a3e73479120738fb7965b01e23d5737c25c2cde909d7c3b5a6faf52d13a3b3f2",
+    "validation": "e3950ee6a16375d566f58d3fc1206dab76fc8e41e340bb580ca0ae2e5ea61f83",
+    "test": "e341013ca7441a5f2621b9347bd933f4d920d080b9931136ee8827d0ac0b2672"
+  },
+  "scope": "Phân loại nhị phân trên ViCTSD; chưa chứng minh hiệu quả trên bình luận YouTube mới.",
+  "majority_baseline": {
+    "accuracy": 0.89,
+    "precision": 0.445,
+    "recall": 0.5,
+    "macro_f1": 0.4708994708994709,
+    "confusion_matrix": [
+      [
+        890,
+        0
+      ],
+      [
+        110,
+        0
+      ]
+    ],
+    "per_class": {
+      "NON_TOXIC": {
+        "precision": 0.89,
+        "recall": 1.0,
+        "f1-score": 0.9417989417989417,
+        "support": 890.0
+      },
+      "TOXIC": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 110.0
+      },
+      "accuracy": 0.89,
+      "macro avg": {
+        "precision": 0.445,
+        "recall": 0.5,
+        "f1-score": 0.4708994708994709,
+        "support": 1000.0
+      },
+      "weighted avg": {
+        "precision": 0.7921,
+        "recall": 0.89,
+        "f1-score": 0.8382010582010582,
+        "support": 1000.0
+      }
+    },
+    "n": 1000
+  },
+  "source_commit": "e1ffb854ef7b7b7ae45a56d132c1f125e02e55e2"
+}

@@ -1,0 +1,9 @@
+.git
+.openai
+.env
+**/__pycache__
+**/*.sqlite3
+backend/private_data
+backend/staticfiles
+*.zip
+*.tar.gz

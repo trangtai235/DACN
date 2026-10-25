@@ -1,0 +1,10 @@
+{
+  "name": "annotaflow-dacn",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check dist/assets/app.js && node --check dist/assets/auth.js && node --check dist/assets/data.js && node --check dist/assets/inference.js",
+    "test:portable": "node scripts/check_portable.mjs"
+  }
+}

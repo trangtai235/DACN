@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Run setup_env.py first}
+      POSTGRES_USER: ${DB_USER:?Run setup_env.py first}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run setup_env.py first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory-policy noeviction
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+  web:
+    build: .
+    env_file: .env
+    environment:
+      JOB_RUNNER: celery
+      TASK_ALWAYS_EAGER: '0'
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - '127.0.0.1:8000:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - private_data:/app/backend/private_data
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/session',timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      start_period: 30s
+      retries: 12
+    restart: unless-stopped
+  worker:
+    build: .
+    command: worker
+    env_file: .env
+    environment:
+      JOB_RUNNER: celery
+      TASK_ALWAYS_EAGER: '0'
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      web:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - private_data:/app/backend/private_data
+    restart: unless-stopped
+volumes:
+  postgres_data:
+  redis_data:
+  private_data:

@@ -1,0 +1,39 @@
+name: PostgreSQL integration tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres: [15, 16, 17, 18]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: isolated_ci_password
+          POSTGRES_DB: annotaflow_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test_user -d annotaflow_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_SECRET_KEY: isolated-ci-only-secret
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: annotaflow_ci
+      DB_USER: test_user
+      DB_PASSWORD: isolated_ci_password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python manage.py wait_for_db
+        working-directory: backend
+      - run: python manage.py makemigrations --check --dry-run
+        working-directory: backend
+      - run: python manage.py test tests --verbosity 2
+        working-directory: backend
