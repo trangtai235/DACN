@@ -4,6 +4,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         postgres: [15, 16, 17, 18]
     services:
@@ -35,5 +36,15 @@ jobs:
         working-directory: backend
       - run: python manage.py makemigrations --check --dry-run
         working-directory: backend
-      - run: python manage.py test tests --verbosity 2
+      - run: |
+          python - <<'PY'
+          import subprocess
+          result = subprocess.run(['python', 'manage.py', 'test', 'tests', '--verbosity', '2'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+          print(result.stdout)
+          if result.returncode:
+              detail = result.stdout[result.stdout.find('======================================================================'):] if '======================================================================' in result.stdout else result.stdout[-12000:]
+              detail = detail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print('::error title=Django test failure::' + detail)
+          raise SystemExit(result.returncode)
+          PY
         working-directory: backend
