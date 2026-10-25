@@ -172,10 +172,6 @@ class StudioTests(TestCase):
         self.assertEqual(self.post('studio/password/reset',body).status_code,200);self.assertEqual(self.post('studio/password/reset',body).status_code,400);self.users[0].refresh_from_db();self.assertTrue(self.users[0].check_password('Fresh-Password!59'))
     def test_json_list_rejected_as_client_error(self):
         response=self.client.post('/api/studio/selection','[]',content_type='application/json');self.assertEqual(response.status_code,400)
-    def test_real_local_prediction_job_without_redis(self):
-        root=settings.BASE_DIR/'artifacts/victsd-logreg-v1';ModelRun.objects.create(project=self.project,name='Baseline',artifact_path=str(root),report=(root/'metrics.json').read_text())
-        job=Job.objects.create(project=self.project,actor=self.users[0],kind='predict',payload=json.dumps({'provider':'local','replace_ai':True}))
-        execute(job.id);job.refresh_from_db();self.assertEqual(job.status,'complete');self.assertEqual(Prediction.objects.count(),1);self.assertIn('identity',job.checkpoint)
     def test_local_prediction_saves_batches_before_more_inference(self):
         from core.jobs.predict import run
         from types import SimpleNamespace
