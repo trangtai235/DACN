@@ -4,15 +4,12 @@ import {icon} from './icons.js';
 export const nav = [
  ['overview','Tổng quan','Overview','chart'],
  ['datasets','Dữ liệu','Data','database'],
- ['annotation','Gán nhãn','Annotate','edit'],
+ ['annotation','Gán nhãn tự động','Auto labelling','brain'],
  ['exports','Xuất dữ liệu','Export','download'],
  ['members','Thành viên','Members','users'],
  ['project-settings','Cài đặt dự án','Project settings','settings'],
  ['models','Model & API','Models & API','brain'],
- ['research','Thực nghiệm','Experiments','shield'],
  ['evaluation','Đánh giá','Evaluation','chart'],
- ['quality','Kiểm tra nhãn','Label quality','check'],
- ['versions','Phiên bản dữ liệu','Dataset versions','layers'],
 ];
 
 export function navigation(route) {

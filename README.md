@@ -1,5 +1,9 @@
 # AnnotaFlow Studio 3
 
+Nhánh **huong-moi**: ML Local tự gán nhãn; khi có API key, LLM chạy song song
+trên cùng dữ liệu và bộ nhãn. Trang kết quả có biểu đồ tỷ lệ nhãn, thời gian từng
+luồng, lọc bất đồng và xuất CSV. Xem [hướng dẫn tự gán nhãn](docs/AUTO_LABEL_VI.md).
+
 Website đồ án chuyên ngành cho nhóm 3 người, viết mới bằng **Django 5.2 + PostgreSQL 15**, tham khảo [AnnotaHub](https://github.com/vdhong/AnnotaHub). Giao diện navy, tiếng Việt/Anh, responsive. Không dùng máy chủ, tài khoản hay thương hiệu của AnnotaHub.
 
 ## Chạy trên Windows — không cần Docker

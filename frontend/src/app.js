@@ -6,17 +6,14 @@ import * as auth from './features/auth/index.js';
 import * as projects from './features/projects/index.js';
 import * as overview from './features/overview/index.js';
 import * as datasets from './features/datasets/index.js';
-import * as annotation from './features/annotation/index.js';
-import * as research from './features/research/index.js';
+import * as annotation from './features/automatic/index.js';
 import * as models from './features/models/index.js';
 import * as evaluation from './features/evaluation/index.js';
-import * as quality from './features/quality/index.js';
-import * as versions from './features/versions/index.js';
-import * as exportsPage from './features/exports/index.js';
+import * as exportsPage from './features/automatic/exports.js';
 import * as settings from './features/project-settings/index.js';
 import * as members from './features/members/index.js';
 import * as account from './features/account/index.js';
-const features={projects,overview,datasets,annotation,research,models,evaluation,quality,versions,exports:exportsPage,'project-settings':settings,members,account};
+const features={projects,overview,datasets,annotation,models,evaluation,exports:exportsPage,'project-settings':settings,members,account};
 import {nav,navigation} from './core/navigation.js';
 let signed=false,currentFeature,refreshing=false;
 const routeName=()=>location.hash.slice(1)||'overview';
@@ -56,3 +53,4 @@ start();
 
 // Refresh job progress without disturbing annotation drafts or focused forms.
 let lastJobs='';setInterval(async()=>{if(DEMO||!signed||state.busy||refreshing||state.route!=='datasets'||document.hidden||document.querySelector('[role=dialog]')||document.activeElement?.closest('input,textarea,select'))return;try{const value=await api('studio/jobs?project='+state.workspace.project.id);const signature=JSON.stringify(value.jobs.map(j=>[j.id,j.status,j.progress,j.message]));if(lastJobs&&signature!==lastJobs)await refresh();lastJobs=signature;}catch{}},5000);
+setInterval(async()=>{if(DEMO||!signed||state.busy||refreshing||state.route!=='annotation'||document.hidden||document.querySelector('[role=dialog]')||document.activeElement?.closest('input,textarea,select')||!annotation.hasActiveJobs())return;await refresh();},3000);

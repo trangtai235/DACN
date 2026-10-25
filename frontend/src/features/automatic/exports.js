@@ -1,0 +1,6 @@
+import {state,DEMO} from '../../core/state.js';
+import {api} from '../../core/api.js';
+import {T,heading,panel,esc,date} from '../../core/ui.js';
+let runs=[];
+export async function load(){runs=DEMO?[]:(await api('studio/auto-label/runs?project='+state.workspace.project.id)).runs;}
+export function render(){return heading(T('Xuất kết quả tự gán nhãn','Export automatic labels'),T('CSV gồm bình luận, nhãn ML Local, nhãn LLM, đánh dấu khác nhau và thời gian từng mẫu.','CSV includes comments, ML Local and LLM labels, disagreements and per-item timing.'))+panel(T('Các lượt chạy','Runs'),runs.length?`<div class="table-wrap"><table><thead><tr><th>${T('Lượt','Run')}</th><th>ML Local</th><th>LLM</th><th>${T('Kết quả','Results')}</th></tr></thead><tbody>${runs.map(r=>`<tr><td>#${r.id} · ${date(r.created_at)}</td><td>${esc(r.model)} · ${r.local?.completed||0}/${r.count}</td><td>${r.llm?esc(r.connection)+' · '+r.llm.completed+'/'+r.count:'—'}</td><td><a class="btn sm" href="/api/studio/auto-label/runs/${r.id}?download=csv">CSV</a></td></tr>`).join('')}</tbody></table></div>`:`<p>${T('Chưa có lượt tự gán nhãn.','No automatic labelling runs yet.')}</p><a class="btn primary" href="#annotation">${T('Đến gán nhãn tự động','Open automatic labelling')}</a>`);}

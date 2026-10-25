@@ -60,6 +60,7 @@ def job_action(request,job_id):
         if old.status not in ('queued','running'):raise ValueError('Tác vụ không còn chạy.')
         old.cancel_requested=True;old.save(update_fields=['cancel_requested','updated_at']);return JsonResponse({'ok':True,'message':'Sẽ dừng ở checkpoint tiếp theo, sau yêu cầu API đang chạy nếu có.'})
     if p.get('action')=='retry':
+        if old.kind=='auto_label':raise ValueError('Mở Gán nhãn tự động để tiếp tục đúng luồng của lượt chạy.')
         if old.status not in ('failed','cancelled'):raise ValueError('Chỉ tiếp tục tác vụ lỗi/đã dừng.')
         writable(project);job=enqueue(project,request.user,old.kind,json.loads(old.payload),checkpoint=old.checkpoint);return JsonResponse({'job':report_job(job)})
     raise ValueError('Thao tác tác vụ không hợp lệ.')

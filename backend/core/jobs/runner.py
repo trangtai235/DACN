@@ -32,7 +32,8 @@ def execute(job_id):
             from .youtube import run as youtube
             from .benchmark import run as benchmark
             from .imports import run as imports
-            handlers={'predict':predict,'train':training,'youtube':youtube,'benchmark_api':benchmark,'import_csv':imports}
+            from .auto_label import run as auto_label
+            handlers={'predict':predict,'train':training,'youtube':youtube,'benchmark_api':benchmark,'import_csv':imports,'auto_label':auto_label}
             if job.kind not in handlers:raise ValueError('Loại tác vụ chưa đăng ký.')
             payload=json.loads(job.payload);result=handlers[job.kind](job,payload)
             tick(job,99,'Đang hoàn tất');job.status='complete';job.progress=100;job.message='Hoàn tất';job.result=json.dumps(result,ensure_ascii=False);job.save(update_fields=['status','progress','message','result','updated_at'])

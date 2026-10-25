@@ -1,18 +1,15 @@
-import {T} from './state.js?v=9d97c650b6d2';
-import {icon} from './icons.js?v=9d97c650b6d2';
+import {T} from './state.js?v=df6196a711f0';
+import {icon} from './icons.js?v=df6196a711f0';
 
 export const nav = [
  ['overview','Tổng quan','Overview','chart'],
  ['datasets','Dữ liệu','Data','database'],
- ['annotation','Gán nhãn','Annotate','edit'],
+ ['annotation','Gán nhãn tự động','Auto labelling','brain'],
  ['exports','Xuất dữ liệu','Export','download'],
  ['members','Thành viên','Members','users'],
  ['project-settings','Cài đặt dự án','Project settings','settings'],
  ['models','Model & API','Models & API','brain'],
- ['research','Thực nghiệm','Experiments','shield'],
  ['evaluation','Đánh giá','Evaluation','chart'],
- ['quality','Kiểm tra nhãn','Label quality','check'],
- ['versions','Phiên bản dữ liệu','Dataset versions','layers'],
 ];
 
 export function navigation(route) {

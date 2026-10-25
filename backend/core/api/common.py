@@ -44,7 +44,7 @@ def project_for(request,pid,manage=False):
     if manage and not manager(project,request.user):raise PermissionError('Chức năng dành cho người quản lý dự án.')
     if request.method=='POST' and request.path not in ('/api/studio/project-settings','/api/studio/profile/save','/api/studio/jobs/'+str(0)+'/action'):
         # Controls that do not alter annotation data remain available while locked.
-        allowed=('/api/studio/connections','/api/studio/selection','/api/studio/members','/api/studio/invite','/api/studio/jobs/')
+        allowed=('/api/studio/connections','/api/studio/selection','/api/studio/members','/api/studio/invite','/api/studio/jobs/','/api/studio/auto-label/runs/')
         if not request.path.startswith(allowed):
             from studio.services.projects import writable
             writable(project)

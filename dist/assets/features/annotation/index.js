@@ -1,8 +1,8 @@
-import {commentCard} from './comment-card.js?v=9d97c650b6d2';
-import {state} from '../../core/state.js?v=9d97c650b6d2';
-import {api,projectQuery} from '../../core/api.js?v=9d97c650b6d2';
-import {refresh,repaint,navigate} from '../../core/events.js?v=9d97c650b6d2';
-import {T,esc,icon,heading,btn,panel,badge,empty,toast,labelName,modal,closeModal,field,formEnd} from '../../core/ui.js?v=9d97c650b6d2';
+import {commentCard} from './comment-card.js?v=df6196a711f0';
+import {state} from '../../core/state.js?v=df6196a711f0';
+import {api,projectQuery} from '../../core/api.js?v=df6196a711f0';
+import {refresh,repaint,navigate} from '../../core/events.js?v=df6196a711f0';
+import {T,esc,icon,heading,btn,panel,badge,empty,toast,labelName,modal,closeModal,field,formEnd} from '../../core/ui.js?v=df6196a711f0';
 let row=null,labels=[],preferences={},sentence,spans=[],picked=new Set(),lastPick=null,note='',history=[],lastSaved=null,goldDraft=null,openedAt=Date.now();
 const rememberNote=()=>{const v=document.querySelector('#annotation-note');if(v)note=v.value;};
 export async function load(){let id=sessionStorage.getItem('annotaflow.openComment');sessionStorage.removeItem('annotaflow.openComment');const draft=sessionStorage.getItem('annotaflow.goldDraft');goldDraft=draft?JSON.parse(draft):null;sessionStorage.removeItem('annotaflow.goldDraft');if(goldDraft)id=goldDraft.id;await fetchRow(id);}
