@@ -279,12 +279,29 @@ class StudioTests(TestCase):
             for algorithm in ('logistic_regression','linear_svm','complement_nb'):
                 report=train(*paths,root/algorithm,algorithm_key=algorithm,label_keys=keys)
                 self.assertEqual(report['label_keys'],keys);self.assertEqual(len(report['test']['confusion_matrix']),3);self.assertEqual(report['test']['n'],12)
-    def test_native_seed_is_idempotent_and_registers_three_models(self):
+    def test_native_seed_is_idempotent_and_registers_verified_models(self):
         from django.core.management import call_command
-        call_command('seed_demo',password='Synthetic-Pass!47',stdout=io.StringIO())
-        call_command('seed_demo',password='Unused-Pass!48',stdout=io.StringIO())
-        demo=Project.objects.get(is_demo=True);self.assertEqual(demo.model_runs.count(),3) if hasattr(demo,'model_runs') else self.assertEqual(ModelRun.objects.filter(project=demo).count(),3)
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            for name in ('phobert-base','xlmr-large'):
+                model_dir=root/'artifacts'/'transformers'/name
+                model_dir.mkdir(parents=True)
+                (model_dir/'verified.json').write_text(json.dumps({'inference_passed':True}),encoding='utf-8')
+                (model_dir/'metrics.json').write_text('{}',encoding='utf-8')
+            with override_settings(BASE_DIR=root):
+                call_command('seed_demo',password='Synthetic-Pass!47',stdout=io.StringIO())
+                call_command('seed_demo',password='Unused-Pass!48',stdout=io.StringIO())
+        demo=Project.objects.get(is_demo=True)
+        self.assertEqual(set(demo.model_runs.values_list('name',flat=True)),{'PhoBERT-base','XLM-R large'})
+        self.assertEqual(demo.model_runs.count(),2)
         self.assertTrue(Annotation.objects.filter(comment__project=demo).exists());self.assertTrue(User.objects.get(username='tv1').check_password('Synthetic-Pass!47'))
+    def test_native_seed_without_optional_transformer_files(self):
+        from django.core.management import call_command
+        with tempfile.TemporaryDirectory() as folder,override_settings(BASE_DIR=Path(folder)):
+            call_command('seed_demo',password='Synthetic-Pass!47',stdout=io.StringIO())
+        demo=Project.objects.get(is_demo=True)
+        self.assertFalse(demo.model_runs.exists())
+        self.assertTrue(Annotation.objects.filter(comment__project=demo).exists())
     def test_skipping_preserves_hidden_ai(self):
         self.assertEqual(self.post(f'studio/comments/{self.comment.id}/annotation',self.payload(status='skipped',revision=0)).status_code,200)
         result=self.client.get('/api/studio/workspace',{'project':self.project.id,'comment':self.comment.id}).json()['comment']

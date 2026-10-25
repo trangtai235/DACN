@@ -67,4 +67,4 @@ class AccountTests(TestCase):
             response=self.client.get(path)
             self.assertEqual(response.status_code,200)
             self.assertContains(response,'data-mode="api"')
-            self.assertContains(response,'href="/assets/styles/auth.css"')
+            self.assertRegex(response.content.decode(),r'href="/assets/styles/auth\.css(?:\?v=[a-f0-9]+)?"')
