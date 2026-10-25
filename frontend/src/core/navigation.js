@@ -8,7 +8,7 @@ export const nav = [
  ['exports','Xuất dữ liệu','Export','download'],
  ['members','Thành viên','Members','users'],
  ['project-settings','Cài đặt dự án','Project settings','settings'],
- ['models','Model & API','Models & API','brain'],
+ ['models','Mô hình & API','Models & API','brain'],
  ['evaluation','Đánh giá','Evaluation','chart'],
 ];
 

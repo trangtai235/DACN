@@ -12,8 +12,19 @@ def settings_view(request):
     p=data(request);project=project_for(request,p['project'],True);prefs=ensure(project)
     if p.get('action')=='delete':
         if project.owner_id!=request.user.id or p.get('confirm')!=project.name:raise PermissionError('Chủ dự án cần nhập đúng tên để xóa.')
-        # Archive is reversible; database records and version history are retained.
-        prefs.archived=True;prefs.locked=True;prefs.save();return JsonResponse({'ok':True,'archived':True})
+        with transaction.atomic():
+            ProjectSettings.objects.select_for_update().get(project=project)
+            if Job.objects.filter(project=project,status__in=['queued','running']).exists():
+                raise ValueError('Dừng các tác vụ đang chạy trước khi xóa dự án.')
+            from reviewing.models import ReviewTask
+            # Explicit order handles legacy PROTECT links between comments,
+            # sources and restored dataset versions before the project cascade.
+            ReviewTask.objects.filter(comment__project=project).delete()
+            project.comments.all().delete()
+            project.dataset_versions.update(restored_from=None)
+            deleted_id=project.pk
+            project.delete()
+        return JsonResponse({'ok':True,'deleted':deleted_id})
     if 'name' in p:
         name=str(p['name']).strip()
         if not 1<=len(name)<=180:raise ValueError('Tên dự án từ 1 đến 180 ký tự.')

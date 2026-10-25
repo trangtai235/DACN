@@ -1,5 +1,5 @@
-import {T} from './state.js?v=df6196a711f0';
-import {icon} from './icons.js?v=df6196a711f0';
+import {T} from './state.js?v=80a8f9e1307d';
+import {icon} from './icons.js?v=80a8f9e1307d';
 
 export const nav = [
  ['overview','Tổng quan','Overview','chart'],
@@ -8,7 +8,7 @@ export const nav = [
  ['exports','Xuất dữ liệu','Export','download'],
  ['members','Thành viên','Members','users'],
  ['project-settings','Cài đặt dự án','Project settings','settings'],
- ['models','Model & API','Models & API','brain'],
+ ['models','Mô hình & API','Models & API','brain'],
  ['evaluation','Đánh giá','Evaluation','chart'],
 ];
 

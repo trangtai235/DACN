@@ -1,4 +1,4 @@
-import {T,esc,icon} from '../../core/ui.js?v=df6196a711f0';
+import {T,esc,icon} from '../../core/ui.js?v=80a8f9e1307d';
 
 export function commentCard(row){
  const youtube=row.source_kind==='youtube';

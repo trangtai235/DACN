@@ -43,7 +43,7 @@ def run(job, payload):
             if branch == 'llm':
                 if snapshot(ProviderConnection.objects.get(pk=connection.pk)) != batch.connection_config:
                     raise ValueError('Cấu hình API đã đổi trong khi chạy. Tạo lượt mới.')
-                value = api_predict(connection, item['text'], batch.labels)
+                value = api_predict(connection, item['text'], batch.labels, sentence_only=True)
             elif model.algorithm == 'transformer_bio':
                 value = transformer_predict(model, [item['text']])[0]
             else:

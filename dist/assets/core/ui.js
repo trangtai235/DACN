@@ -1,5 +1,5 @@
-import {icon} from './icons.js?v=df6196a711f0';
-import {state,T,DEMO} from './state.js?v=df6196a711f0';
+import {icon} from './icons.js?v=80a8f9e1307d';
+import {state,T,DEMO} from './state.js?v=80a8f9e1307d';
 export {icon,T};
 export const $=s=>document.querySelector(s);
 export const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -146,7 +146,7 @@ class StudioTests(TestCase):
         from openpyxl import load_workbook
         data,_,_=render(self.project,rows,'xlsx');value=load_workbook(io.BytesIO(data)).worksheets[0]['B2'];self.assertNotEqual(value.data_type,'f')
     def test_provider_secret_preserved_and_not_returned(self):
-        body=self.payload(name='Local Ollama',kind='ollama',base_url='http://127.0.0.1:11434',model='test-model',api_key='secret-not-in-response')
+        body=self.payload(name='Custom API',kind='openai_compatible',base_url='https://api.river.ai/v1',model='test-model',api_key='secret-not-in-response')
         r=self.post('studio/connections/save',body);self.assertEqual(r.status_code,200);self.assertNotIn('secret-not-in-response',r.content.decode());c=ProviderConnection.objects.get();self.assertNotEqual(c.encrypted_key,body['api_key']);self.assertEqual(decrypt(c.encrypted_key),body['api_key'])
         body.update(id=c.id,api_key='');self.post('studio/connections/save',body);c.refresh_from_db();self.assertEqual(decrypt(c.encrypted_key),'secret-not-in-response')
         result=self.client.get('/api/studio/connections',{'project':self.project.id});self.assertNotIn('secret-not-in-response',result.content.decode())
