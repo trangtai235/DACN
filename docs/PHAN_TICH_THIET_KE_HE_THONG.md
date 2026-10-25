@@ -38,7 +38,7 @@ AnnotaFlow tổ chức quá trình tự gán nhãn thành các lượt độc l�
 | Môi trường chính | Windows chạy Django tại localhost và PostgreSQL cục bộ |
 | Môi trường khác | Có cấu hình Docker/Celery/Redis; không đồng nghĩa đã kiểm chứng tải production |
 
-**Lưu ý về model:** Ba bộ trọng số hiện tại được nhập từ `vihos-models-full.zip` trên Drive. Hệ thống đã kiểm tra nạp trọng số và suy luận. Điều này không chứng minh ba model được huấn luyện trên máy đang chạy website. Dataset và mã train gốc đã được bổ sung từ ba ZIP do người dùng cung cấp, tại `datasets/ViHOS/`, `training/` và `notebooks/training/`. Notebook nhập chưa có output thực thi; log gắn với một commit chỉ được tạo khi thực sự chạy wrapper mới. Xem `docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md`.
+**Lưu ý về model:** Ba bộ trọng số hiện tại được nhập từ `vihos-models-full.zip` trên Drive. Hệ thống đã kiểm tra nạp trọng số và suy luận. Điều này không chứng minh ba model được huấn luyện trên máy đang chạy website. Dataset và mã train gốc đã được bổ sung từ ba ZIP do người dùng cung cấp, tại `datasets/ViHOS/` và `training/`. Notebook đã được bỏ khỏi source; hồ sơ nhập không xác minh lần train lịch sử; log gắn với một commit chỉ được tạo khi thực sự chạy wrapper mới. Xem `docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md`.
 
 ## 2. Phân tích tác nhân và yêu cầu
 
@@ -187,7 +187,6 @@ AnnotaFlow/
 │   └── manage.py                  Điểm vào lệnh quản trị Django
 ├── datasets/ViHOS/                 Dataset train/dev/test gốc từ ZIP
 ├── training/                      Mã train, cấu hình và bằng chứng chạy
-├── notebooks/training/            Notebook Colab nguyên bản chưa có output
 ├── frontend/
 │   ├── index.html
 │   ├── public/                    Tài nguyên tĩnh và báo cáo cho demo
@@ -736,6 +735,6 @@ Các đường dẫn dưới đây tương đối với thư mục dự án:
 5. Demo một lượt Local và một lượt có Local/LLM; trình bày biểu đồ, thời gian và bất đồng.
 6. Mở pgAdmin với `docs/XEM_CSDL.sql` để đối chiếu dữ liệu đã lưu.
 7. Trình bày test, các giới hạn và hướng phát triển.
-8. Nếu trình bày huấn luyện model, bổ sung notebook/dataset/log gốc và nói rõ môi trường đã train.
+8. Nếu trình bày huấn luyện model, bổ sung dataset/log gốc và nói rõ môi trường đã train.
 
 Tài liệu này mô tả phân tích và thiết kế bám theo source hiện tại; có thể dùng làm cơ sở cho chương phân tích thiết kế trong báo cáo, sau khi bổ sung thông tin nhóm, yêu cầu của giảng viên và bằng chứng thực nghiệm của nhóm.

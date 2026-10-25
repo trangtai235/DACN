@@ -1,5 +1,4 @@
 # Preserve the original bytes of supplied training material for SHA-256 checks.
 datasets/ViHOS/data/** -text -whitespace
 training/vihos/*.py -text -whitespace
-notebooks/training/*.ipynb -text -whitespace
 training/evidence/imported/** -text -whitespace

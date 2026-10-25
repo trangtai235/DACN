@@ -76,9 +76,6 @@ AnnotaFlow/
 │   │   └── runs/                  Sinh khi chạy thực tế, chưa phải dữ liệu có sẵn
 │   ├── runs/                      Model đầu ra của lần train mới, chưa được train
 │   └── run_experiment.py
-├── notebooks/
-│   └── training/
-│       └── Colab - Train ViHOS.ipynb
 ├── scripts/
 │   └── verify_training_bundle.py
 ├── backend/artifacts/transformers/vihos-full/
@@ -96,7 +93,6 @@ AnnotaFlow/
 | `code/train_vihos.py` | `training/vihos/train_vihos.py` |
 | `code/vihos_data.py` | `training/vihos/vihos_data.py` |
 | `code/eval_model.py` | `training/vihos/eval_model.py` |
-| `notebooks/Colab - Train ViHOS.ipynb` | `notebooks/training/Colab - Train ViHOS.ipynb` |
 | Hai TXT của ZIP trước train | `training/evidence/imported/before/` |
 | Toàn bộ ZIP sau train | `training/evidence/imported/after/` |
 
@@ -119,11 +115,10 @@ nhập bình luận của website để chạy trainer.
 | `training/configs/three_models.json` | Tham số sẽ truyền cho ba lần chạy theo hồ sơ được cung cấp |
 | `training/provenance/import_manifest.json` | Hash file và ghi nhận việc nhập tài liệu, không phải log train |
 | `training/evidence/imported/after/metrics/` | Báo cáo cũ; đối chiếu với báo cáo của website |
-| Notebook nguyên bản | Mã/thao tác Colab được cung cấp, chưa có output chạy |
 | `training/evidence/runs/<id>/` | Log, manifest và báo cáo của lần thực thi mới |
 | `training/runs/<id>/model/` | Trọng số và tokenizer thật được sinh sau khi train xong |
 
-`.gitattributes` giữ nguyên byte các CSV, script gốc, notebook và báo cáo nhập.
+`.gitattributes` giữ nguyên byte các CSV, script gốc và báo cáo nhập.
 Nếu Git đổi LF/CRLF khi checkout, hash có thể đổi dù nội dung nhìn tương tự;
 do đó cần giữ file này khi chia sẻ source giữa Windows và Linux/Colab.
 
@@ -182,7 +177,7 @@ chạy thực tế. Không sử dụng output dry-run làm minh chứng đã hu�
 
 ```powershell
 git branch --show-current
-git add .gitattributes .gitignore datasets/ViHOS training notebooks/training scripts/verify_training_bundle.py docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md
+git add .gitattributes .gitignore datasets/ViHOS training scripts/verify_training_bundle.py docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md
 git diff --cached --stat
 git commit -m "Bo sung dataset ViHOS va pipeline huan luyen ba model"
 git rev-parse HEAD
@@ -317,10 +312,7 @@ repo trên Colab, checkout đúng commit rồi chạy `training/run_experiment.p
 với cùng dataset trong repo. Lưu notebook có output thực thi và thư mục
 `training/evidence/runs/<run-id>/` về cùng checkpoint.
 
-Notebook nguyên bản hiện được giữ để tham khảo, nhưng các ô `%%writefile`
-và tải dataset từ nhánh `master` không tự gắn với Git commit của website.
-Nếu dùng các ô đó phải đối chiếu lại hash code/data. Không đổi các ô Colab
-chưa chạy thành output giả.
+Notebook nguyên bản đã được bỏ khỏi source. Nếu dùng Colab, clone đúng commit và chạy các script Python hiện có; không tự tạo output huấn luyện giả.
 
 Train trên Colab có thể chứng minh dùng cùng code/dataset/commit nếu ghi nhận
 đầy đủ; không được gọi đó là huấn luyện trên máy Windows này. Nếu yêu cầu

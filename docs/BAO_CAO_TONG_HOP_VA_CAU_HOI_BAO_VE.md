@@ -111,7 +111,7 @@ Frontend dùng HTML, CSS và JavaScript ES modules, điều hướng bằng URL 
 | Hồ sơ model | backend/experiments/ | ModelRun, artifact_path và báo cáo; có cơ chế thí nghiệm cũ |
 | Trọng số | backend/artifacts/transformers/vihos-full/ | Ba thư mục phobert-base, xlmr-base, xlmr-large |
 | Dataset | datasets/ViHOS/data/ | Năm CSV train/dev/test nguyên bản được nhập |
-| Train và bằng chứng | training/ và notebooks/training/ | Script train/eval, cấu hình, hồ sơ nhập, wrapper thực nghiệm và notebook |
+| Train và bằng chứng | training/ | Script train/eval, cấu hình, hồ sơ nhập và wrapper thực nghiệm |
 | Triển khai/kiểm thử | scripts/, requirements/, backend/tests/, .github/workflows/ | Build, setup Windows, dependencies và kiểm thử |
 | Tài liệu/output | docs/ và dist/ | Tài liệu báo cáo; dist là frontend được sinh, không phải nơi sửa nguồn chính |
 
@@ -310,7 +310,7 @@ Không gọi 0,7825 là “accuracy 78,25%” hoặc “macro-F1 câu 78,25%”.
 | Trọng số đang phục vụ | backend/artifacts/transformers/vihos-full/ | Có model có thể được nạp để suy luận |
 | Wrapper lần chạy mới | training/run_experiment.py | Khi chạy thật sẽ ghi commit, hash, cấu hình, môi trường, log, trạng thái và artifact |
 
-Tại thời điểm lập tài liệu, import_manifest ghi training_execution_verified=false và chưa có thư mục training/evidence/runs. Notebook được nhập chưa có output thực thi. Vì vậy câu nói phù hợp là: “Source hiện đã tích hợp dữ liệu, mã huấn luyện, cấu hình, trọng số và báo cáo của ba model; để chứng minh đã train trên máy này từ commit cụ thể cần chạy và lưu manifest/log thật.” Không thể tạo bằng chứng lịch sử chỉ bằng sao chép tệp hoặc đổi ngày tháng.
+Tại thời điểm lập tài liệu, import_manifest ghi training_execution_verified=false và chưa có thư mục training/evidence/runs. Notebook đã được bỏ khỏi source; chưa có log xác minh lần train lịch sử. Vì vậy câu nói phù hợp là: “Source hiện đã tích hợp dữ liệu, mã huấn luyện, cấu hình, trọng số và báo cáo của ba model; để chứng minh đã train trên máy này từ commit cụ thể cần chạy và lưu manifest/log thật.” Không thể tạo bằng chứng lịch sử chỉ bằng sao chép tệp hoặc đổi ngày tháng.
 
 Lệnh tham khảo sau khi lưu source/dataset vào Git và chuẩn bị tài nguyên: python training/run_experiment.py --model xlmr-base --mode train. Lặp lại với phobert-base và xlmr-large khi đủ điều kiện. --mode smoke chỉ kiểm pipeline, --mode evaluate chỉ chấm trọng số có sẵn; cả hai không thay thế full training. Báo cáo này không chạy thêm tác vụ train tốn tài nguyên.
 

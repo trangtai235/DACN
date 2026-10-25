@@ -41,7 +41,7 @@ def verify(weights=False):
             actual=file_sha(target);ok=actual.startswith(prefix)
             print(('OK   ' if ok else 'FAIL ')+key+' weights SHA-256 '+actual)
             if not ok:failures.append(str(target.relative_to(ROOT)))
-    print('Notebook executed cells:',manifest['notebook']['executed_cells'])
+    print('Notebook is excluded from the distributed source; archived metadata is retained for provenance.')
     print('This verifies file consistency, not who/where/when historical training ran.')
     if failures:raise SystemExit(1)
     return manifest

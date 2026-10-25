@@ -78,13 +78,6 @@
       "source_entry": "code/eval_model.py"
     },
     {
-      "path": "notebooks/training/Colab - Train ViHOS.ipynb",
-      "size_bytes": 46369,
-      "sha256": "6f1e8bd0772acd4c219cbad817aec4133f1c46df7d1f15a2ef5af7f1d926d7d5",
-      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
-      "source_entry": "notebooks/Colab - Train ViHOS.ipynb"
-    },
-    {
       "path": "training/evidence/imported/before/THONG TIN DU LIEU.txt",
       "size_bytes": 2107,
       "sha256": "edada782ce82a316860811d0ac0a8964936303755f00acd36fffb1850549e073",
@@ -315,7 +308,8 @@
   "notebook": {
     "code_cells": 13,
     "executed_cells": 0,
-    "output_blocks": 0
+    "output_blocks": 0,
+    "included_in_source": false
   },
   "import_git_commit": "77ccb364ec99595a438a41852b44ba4366d12f94",
   "limitations": [
@@ -323,5 +317,15 @@
     "Historical metrics do not include dataset hashes, training commit or execution timestamps.",
     "A source import cannot establish that existing weights were trained from the current Git commit.",
     "Imported train_vihos.py records dev_best from the final epoch, not the selected best checkpoint."
+  ],
+  "excluded_files": [
+    {
+      "path": "notebooks/training/Colab - Train ViHOS.ipynb",
+      "size_bytes": 46369,
+      "sha256": "6f1e8bd0772acd4c219cbad817aec4133f1c46df7d1f15a2ef5af7f1d926d7d5",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "notebooks/Colab - Train ViHOS.ipynb",
+      "reason": "Removed from distributed source at user request; archive record retained for provenance."
+    }
   ]
 }

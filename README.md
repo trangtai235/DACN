@@ -1,7 +1,7 @@
 # AnnotaFlow Studio 3
 
 Dataset ViHOS, mã train gốc và hồ sơ đối chiếu được bổ sung trong `datasets/`,
-`training/`, `notebooks/training/`. Xem [hướng dẫn tích hợp và minh chứng train](docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md).
+`training/`. Xem [hướng dẫn tích hợp và minh chứng train](docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md).
 
 Nhánh **huong-moi**: ML Local tự gán nhãn; khi có API key, LLM chạy song song
 trên cùng dữ liệu và bộ nhãn. Trang kết quả có biểu đồ tỷ lệ nhãn, thời gian từng

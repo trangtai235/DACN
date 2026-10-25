@@ -18,8 +18,7 @@ Mẫu lệnh kiểm tra, không train:
 .venv/Scripts/python.exe -X utf8 training/run_experiment.py --model xlmr-base --dry-run
 ```
 
-Notebook nguyên bản tại `notebooks/training/Colab - Train ViHOS.ipynb` chưa có
-output thực thi. Các báo cáo có số liệu epoch không tự chứng minh thời gian,
+Notebook đã được bỏ khỏi source theo yêu cầu. Pipeline huấn luyện dùng các script Python trong `training/vihos/`. Các báo cáo có số liệu epoch không tự chứng minh thời gian,
 thiết bị hoặc commit lịch sử. Để chứng minh một lần train mới từ source này,
 commit các input và script trước, rồi chạy wrapper mà không dùng `--dry-run`.
 
