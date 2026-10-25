@@ -1,0 +1,70 @@
+================================================================
+  THONG TIN BO DU LIEU ViHOS
+  Sinh ngay 25/10/2026
+================================================================
+
+SO LUONG
+--------
+
+  Tap train      8,844 cau     112,754 dong nhan
+                  O   91,598   B-T  10,075   I-T  11,081
+
+  Tap dev        1,106 cau      14,476 dong nhan
+                  O   11,702   B-T   1,329   I-T   1,445
+
+  Tap test       1,106 cau       1,266 cum doc hai
+                  531 cau co cum doc hai
+                  575 cau khong co cum nao
+
+
+DAU VAN TAY SHA-256 (32 ky tu dau)
+----------------------------------
+
+  036ef6afa5efbe1dc0a0826e4c41e512    2,803,673  train_BIO_syllable.csv
+  70406f825964ec73bb2e52b430e6807f      323,710  dev_BIO_syllable.csv
+  e7c0242d526b7303bb2acd898ba12470    2,717,454  train_BIO_Word.csv
+  e9346bcdf40a834b9647aa2f14cdb44c      314,759  dev_BIO_Word.csv
+  0c8d09f1e9d649ac206619a717610e80      121,774  test.csv
+
+  Ma nguon:
+  fa326834404e2779627d3b1e4c630f3e       24,627  train_vihos.py
+  34cc8471e1c83ea9030c40ea34e4b091        7,251  vihos_data.py
+  9d8724b6dcc5b52e2c99f23fc0c0946f       13,388  eval_model.py
+
+  SHA-256 la "dau van tay" cua file: bam lai file la biet co dung
+  file goc hay khong. Sua 1 ky tu la dau van tay doi ngay.
+
+
+COT TRONG FILE NHAN
+-------------------
+
+  Word          am tiet tieng Viet da tach
+  Tag           nhan BIO cua am tiet do
+  sentence_id   cau thu may
+
+
+BO NHAN: 1 loai - TOXIC, viet duoi 3 tag
+----------------------------------------
+
+  O     khong doc hai          (Outside)
+  B-T   bat dau cum doc hai    (Begin - Toxic)
+  I-T   trong cum doc hai      (Inside - Toxic)
+
+  Day la MOT nhan viet o 3 vi tri, KHONG phai 3 nhan khac nhau.
+  Mo hinh CHI biet nhan TOXIC. Chua phan biet duoc CONSTRUCTIVE,
+  NOT_CONSTRUCTIVE, NEUTRAL hay SPAM.
+
+
+VI DU THAT
+----------
+
+  Cau: "Add ngu vai noi"
+
+     Add   ->  O
+     ngu   ->  B-T     bat dau cum
+     vai   ->  I-T     trong cum
+     noi   ->  I-T     trong cum
+
+  Ket qua: 1 cum doc hai = "ngu vai noi"
+
+================================================================

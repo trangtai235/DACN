@@ -1,0 +1,5 @@
+{
+  "phobert-base": {"model": "vinai/phobert-base", "variant": "syllable", "epochs": 5, "batch_size": 32, "lr": 0.00002, "grad_accum": 1, "max_len": 128, "seed": 42},
+  "xlmr-base": {"model": "xlm-roberta-base", "variant": "syllable", "epochs": 5, "batch_size": 16, "lr": 0.00003, "grad_accum": 1, "max_len": 128, "seed": 42},
+  "xlmr-large": {"model": "xlm-roberta-large", "variant": "syllable", "epochs": 4, "batch_size": 8, "lr": 0.00001, "grad_accum": 2, "max_len": 128, "seed": 42}
+}

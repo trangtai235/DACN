@@ -1,6 +1,6 @@
 /** Browser-only synthetic workspace. No passwords, remote requests or fabricated training/API scores. */
-import {state,T} from './state.js?v=80a8f9e1307d';
-import {formatExport} from './exporters.js?v=80a8f9e1307d';
+import {state,T} from './state.js?v=f62135f1ecf7';
+import {formatExport} from './exporters.js?v=f62135f1ecf7';
 const KEY='annotaflow.studio.v3';let db,catalog;
 const members=[{id:1,username:'tv1',name:'Minh Anh',role:'manager'},{id:2,username:'tv2',name:'Quốc Bảo',role:'annotator'},{id:3,username:'tv3',name:'Khánh Linh',role:'annotator'}];
 const now=()=>new Date().toISOString();const clone=o=>JSON.parse(JSON.stringify(o));

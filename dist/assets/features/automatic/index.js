@@ -1,7 +1,7 @@
-import {state,DEMO} from '../../core/state.js?v=80a8f9e1307d';
-import {api} from '../../core/api.js?v=80a8f9e1307d';
-import {refresh} from '../../core/events.js?v=80a8f9e1307d';
-import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=80a8f9e1307d';
+import {state,DEMO} from '../../core/state.js?v=f62135f1ecf7';
+import {api} from '../../core/api.js?v=f62135f1ecf7';
+import {refresh} from '../../core/events.js?v=f62135f1ecf7';
+import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=f62135f1ecf7';
 
 let listing={runs:[],api_ready:false},detail=null,selected=null,projectId=null,page=1,onlyDifferent=false,query='';
 const active=job=>job&&['queued','running'].includes(job.status);

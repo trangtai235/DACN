@@ -1,0 +1,85 @@
+================================================================
+  LENH HUAN LUYEN - 3 MO HINH
+  Sinh ngay 25/10/2026
+================================================================
+
+Thu tu thu muc nay:
+
+  datasets\ViHOS\        Bo du lieu dau vao
+  code\                  Ma nguon huan luyen
+  notebooks\             Notebook Colab
+  THONG TIN DU LIEU.txt   So lieu chi tiet + dau van tay SHA-256
+  LENH TRAIN.txt          File nay
+
+
+CAN CHUAN BI
+------------
+
+  1. Python 3.10 tro len
+  2. Ba thu vien:  python -m pip install torch transformers numpy
+  3. Internet (tai trong so goc tu HuggingFace):
+       xlm-roberta-large    ~2,2 GB
+       xlm-roberta-base     ~1,1 GB
+       vinai/phobert-base   ~0,5 GB
+
+
+BA LENH CHINH XAC DA DUNG
+-------------------------
+
+  XLM-R base    (5 epoch, batch 16, lr 3e-5)
+  ------------------------------------------------------------
+  python code\train_vihos.py --variant syllable \
+    --model xlm-roberta-base --epochs 5 --batch-size 16 --lr 3e-5 \
+    --test --data-root datasets\ViHOS --out ket-qua\xlmr-base
+
+
+  XLM-R large   (4 epoch, batch 8, lr 1e-5, grad-accum 2)
+  ------------------------------------------------------------
+  python code\train_vihos.py --variant syllable \
+    --model xlm-roberta-large --epochs 4 --batch-size 8 --lr 1e-5 \
+    --grad-accum 2 --test --data-root datasets\ViHOS --out ket-qua\xlmr-large
+
+
+  PhoBERT base  (5 epoch, batch 32, lr 2e-5)
+  ------------------------------------------------------------
+  python code\train_vihos.py --variant syllable \
+    --model vinai/phobert-base --epochs 5 --batch-size 32 --lr 2e-5 \
+    --test --data-root datasets\ViHOS --out ket-qua\phobert-base
+
+
+  (Dau \ la xuong dong. Tren Windows co the viet tat ca tren 1 dong.)
+
+
+VI SAO BAT BUOC PHAI LA --variant syllable
+------------------------------------------
+
+  File test.csv chi co van ban tho + vi tri cum, KHONG co vi tri ky tu.
+  Ban --variant word lam mat vi tri ky tu nen khong cham duoc test.csv.
+
+
+THOI GIAN
+---------
+
+  Co GPU (Colab T4)  : 20 - 40 phut ca 3
+  Chi CPU            : 6 - 12 gio ca 3
+
+
+CHAY BANG COLAB
+---------------
+
+  Mo file notebooks\Colab - Train ViHOS.ipynb bang Colab.
+  Notebook da ghi san ca 3 lenh tren, chi can bam Run.
+
+
+KET QUA SE RA O DAU
+-------------------
+
+  Trong thu muc --out, vao vi du ket-qua\xlmr-large\, se co:
+     model.safetensors    trong so da train
+     config.json          kien truc + bo nhan
+     tokenizer.json       bo tach tu
+     metrics.json         toan bo sieu tham so + nhat ky + ket qua
+
+  Xem file "2 - KET QUA SAU KHI TRAIN.zip" de doi chieu so.
+
+================================================================

@@ -20,3 +20,7 @@ backend/staticfiles/
 .env.*
 !.env.example
 backend/artifacts/transformers/
+training/runs/
+!training/evidence/runs/**/*.log
+# Microsoft Office temporary lock files
+~$*

@@ -1,0 +1,327 @@
+{
+  "event": "import_of_supplied_training_materials",
+  "imported_at_utc": "2026-10-25T13:52:39.059817+00:00",
+  "training_execution_verified": false,
+  "note": "This records an import now, not the date, machine or Git commit of historical training.",
+  "archives": [
+    {
+      "name": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "size_bytes": 2099099,
+      "sha256": "9509feac77a165a2c19bb1e0eb44a3f27605492be282a2b0d648608dede712b6"
+    },
+    {
+      "name": "2 - KET QUA SAU KHI TRAIN.zip",
+      "size_bytes": 183690,
+      "sha256": "321014539d6839a84f2018fd449fd9895732c133176af7f5ba161428fb8e37b8"
+    },
+    {
+      "name": "datasets.zip",
+      "size_bytes": 2056338,
+      "sha256": "7bc21ee35c70074cee80447e5d9acf958634d7c7a583338972fc36d8519e293a"
+    }
+  ],
+  "files": [
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Syllable/dev_BIO_syllable.csv",
+      "size_bytes": 323710,
+      "sha256": "70406f825964ec73bb2e52b430e6807fed5d91dafeff9b0684c203df45e57291",
+      "source_archive": "datasets.zip",
+      "source_entry": "datasets/data/Sequence_labeling_based_version/Syllable/dev_BIO_syllable.csv"
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Syllable/train_BIO_syllable.csv",
+      "size_bytes": 2803673,
+      "sha256": "036ef6afa5efbe1dc0a0826e4c41e512c421761fb763e1915d361d0d012332ba",
+      "source_archive": "datasets.zip",
+      "source_entry": "datasets/data/Sequence_labeling_based_version/Syllable/train_BIO_syllable.csv"
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Word/dev_BIO_Word.csv",
+      "size_bytes": 314759,
+      "sha256": "e9346bcdf40a834b9647aa2f14cdb44cca4c18e01973df7398b1f0250a7fc060",
+      "source_archive": "datasets.zip",
+      "source_entry": "datasets/data/Sequence_labeling_based_version/Word/dev_BIO_Word.csv"
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Word/train_BIO_Word.csv",
+      "size_bytes": 2717454,
+      "sha256": "e7c0242d526b7303bb2acd898ba1247027da8aeacfbea6ebee18effc83dc6678",
+      "source_archive": "datasets.zip",
+      "source_entry": "datasets/data/Sequence_labeling_based_version/Word/train_BIO_Word.csv"
+    },
+    {
+      "path": "datasets/ViHOS/data/Test_data/test.csv",
+      "size_bytes": 121774,
+      "sha256": "0c8d09f1e9d649ac206619a717610e805001c4e74d13325f16b931ddd43c3cd8",
+      "source_archive": "datasets.zip",
+      "source_entry": "datasets/data/Test_data/test.csv"
+    },
+    {
+      "path": "training/vihos/train_vihos.py",
+      "size_bytes": 24627,
+      "sha256": "fa326834404e2779627d3b1e4c630f3e604c3907ae800e65f2bb9bb16eabf880",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "code/train_vihos.py"
+    },
+    {
+      "path": "training/vihos/vihos_data.py",
+      "size_bytes": 7251,
+      "sha256": "34cc8471e1c83ea9030c40ea34e4b091012f8181622bf1287c3c5c5725562cc3",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "code/vihos_data.py"
+    },
+    {
+      "path": "training/vihos/eval_model.py",
+      "size_bytes": 13388,
+      "sha256": "9d8724b6dcc5b52e2c99f23fc0c0946f733f3baa49441810fb83515242fc08a5",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "code/eval_model.py"
+    },
+    {
+      "path": "notebooks/training/Colab - Train ViHOS.ipynb",
+      "size_bytes": 46369,
+      "sha256": "6f1e8bd0772acd4c219cbad817aec4133f1c46df7d1f15a2ef5af7f1d926d7d5",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "notebooks/Colab - Train ViHOS.ipynb"
+    },
+    {
+      "path": "training/evidence/imported/before/THONG TIN DU LIEU.txt",
+      "size_bytes": 2107,
+      "sha256": "edada782ce82a316860811d0ac0a8964936303755f00acd36fffb1850549e073",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "THONG TIN DU LIEU.txt"
+    },
+    {
+      "path": "training/evidence/imported/before/LENH TRAIN.txt",
+      "size_bytes": 2649,
+      "sha256": "8273f3ce6fe60441419247d1760de214cd54261bec5d94dff27fa56c420fb643",
+      "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
+      "source_entry": "LENH TRAIN.txt"
+    },
+    {
+      "path": "training/evidence/imported/after/KET QUA TRAIN - DAY DU.xlsx",
+      "size_bytes": 10174,
+      "sha256": "104e45dcf731ccaa8724417feceabf7346b8d86283a27db8a11ae737dbee08a0",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "KET QUA TRAIN - DAY DU.xlsx"
+    },
+    {
+      "path": "training/evidence/imported/after/KET QUA TRAIN - DAY DU.txt",
+      "size_bytes": 4895,
+      "sha256": "56b72206b7028a8700c017390270cc69e40f99b2060ba34978ab51cd36ebab04",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "KET QUA TRAIN - DAY DU.txt"
+    },
+    {
+      "path": "training/evidence/imported/after/KET QUA TRAIN - DAY DU.json",
+      "size_bytes": 12271,
+      "sha256": "6c54c248df2812c8bd3036d570a49ca5f3e051ad279923d6ebde18b89dfc5082",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "KET QUA TRAIN - DAY DU.json"
+    },
+    {
+      "path": "training/evidence/imported/after/MINH CHUNG HUAN LUYEN.docx",
+      "size_bytes": 42310,
+      "sha256": "0c7fbfda69f0d3e6a78518f451490fbe7915457b555a50b33d36cd4aecf1252d",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "MINH CHUNG HUAN LUYEN.docx"
+    },
+    {
+      "path": "training/evidence/imported/after/MINH CHUNG HUAN LUYEN.md",
+      "size_bytes": 8587,
+      "sha256": "c3275d5a78d4c1fb577d5a6bb3841d050c27870b64fd7cf428f94126c31182fb",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "MINH CHUNG HUAN LUYEN.md"
+    },
+    {
+      "path": "training/evidence/imported/after/BANG CHI SO SO SANH.docx",
+      "size_bytes": 40516,
+      "sha256": "b05c9aa582a8dfb28701f862be66a17c3ead2d09561c870db6467f79f4926ea6",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "BANG CHI SO SO SANH.docx"
+    },
+    {
+      "path": "training/evidence/imported/after/KET QUA HUAN LUYEN - bang so sanh mo hinh.docx",
+      "size_bytes": 42614,
+      "sha256": "0cee99364d5a2b6d4fca76454e0fe6a556c2817c9bcd5fcc9cbcbae24a647973",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "KET QUA HUAN LUYEN - bang so sanh mo hinh.docx"
+    },
+    {
+      "path": "training/evidence/imported/after/GUIDELINE GAN NHAN v1.0.docx",
+      "size_bytes": 45648,
+      "sha256": "4579b2813f8f4e4c408663062a8a328c7b0698a37e9a8542f7cdbadd8eb527e0",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "GUIDELINE GAN NHAN v1.0.docx"
+    },
+    {
+      "path": "training/evidence/imported/after/metrics/xlmr-large.json",
+      "size_bytes": 3170,
+      "sha256": "935d4a265352cbc03d69672ab2adf1a85c8b8b557b827b103106a6df64842d43",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "metrics/xlmr-large.json"
+    },
+    {
+      "path": "training/evidence/imported/after/config/xlmr-large.json",
+      "size_bytes": 886,
+      "sha256": "31cf92de8573ad34543c258f65faf809ea7b57c03b654fe61bdf5a300a611d43",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "config/xlmr-large.json"
+    },
+    {
+      "path": "training/evidence/imported/after/metrics/xlmr-base.json",
+      "size_bytes": 3708,
+      "sha256": "6fc0b86e8851407e9ba18e50580ecb8bd9f3c537b3486864779e8cd11e278dd5",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "metrics/xlmr-base.json"
+    },
+    {
+      "path": "training/evidence/imported/after/config/xlmr-base.json",
+      "size_bytes": 885,
+      "sha256": "a06932137f543e17efab31a2725e8d953b01392e576cfa632d8315c0ac15bc2d",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "config/xlmr-base.json"
+    },
+    {
+      "path": "training/evidence/imported/after/metrics/phobert-base.json",
+      "size_bytes": 3739,
+      "sha256": "d0ce301ff6a2faa33ae5160eeab79abf84be6c53a8dc609d064014cba620be09",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "metrics/phobert-base.json"
+    },
+    {
+      "path": "training/evidence/imported/after/config/phobert-base.json",
+      "size_bytes": 889,
+      "sha256": "a86b5ee5b1e1c6b8928956a2da3984c4192c042acfe3217d0ff98b1ab9daaec8",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "config/phobert-base.json"
+    },
+    {
+      "path": "training/evidence/imported/after/DOC KET QUA.txt",
+      "size_bytes": 3108,
+      "sha256": "a2a2e110d8091a606165440c2e48e77862cfb741b8161e1029a44d6213c85aec",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "DOC KET QUA.txt"
+    }
+  ],
+  "datasets": [
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Syllable/dev_BIO_syllable.csv",
+      "rows": 14476,
+      "columns": [
+        "",
+        "index",
+        "Word",
+        "Tag",
+        "sentence_id"
+      ],
+      "duplicate_archives_identical": true,
+      "sentences": 1106,
+      "tags": [
+        "B-T",
+        "I-T",
+        "O"
+      ]
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Syllable/train_BIO_syllable.csv",
+      "rows": 112754,
+      "columns": [
+        "",
+        "index",
+        "Word",
+        "Tag",
+        "sentence_id"
+      ],
+      "duplicate_archives_identical": true,
+      "sentences": 8844,
+      "tags": [
+        "B-T",
+        "I-T",
+        "O"
+      ]
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Word/dev_BIO_Word.csv",
+      "rows": 13948,
+      "columns": [
+        "",
+        "index",
+        "Word",
+        "Tag",
+        "sentence_id"
+      ],
+      "duplicate_archives_identical": true,
+      "sentences": 1106,
+      "tags": [
+        "B-T",
+        "I-T",
+        "O"
+      ]
+    },
+    {
+      "path": "datasets/ViHOS/data/Sequence_labeling_based_version/Word/train_BIO_Word.csv",
+      "rows": 108432,
+      "columns": [
+        "",
+        "index",
+        "Word",
+        "Tag",
+        "sentence_id"
+      ],
+      "duplicate_archives_identical": true,
+      "sentences": 8844,
+      "tags": [
+        "B-T",
+        "I-T",
+        "O"
+      ]
+    },
+    {
+      "path": "datasets/ViHOS/data/Test_data/test.csv",
+      "rows": 1106,
+      "columns": [
+        "",
+        "content",
+        "index_spans"
+      ],
+      "duplicate_archives_identical": true,
+      "sentences": 1106
+    }
+  ],
+  "model_comparison": [
+    {
+      "model": "phobert-base",
+      "app_artifact_directory": "backend/artifacts/transformers/vihos-full/phobert-base",
+      "metrics_identical_bytes": true,
+      "config_identical_bytes": true,
+      "provided_weight_sha256_prefix": "23fe96ca2b2a87f7d9e101a460918f6c"
+    },
+    {
+      "model": "xlmr-base",
+      "app_artifact_directory": "backend/artifacts/transformers/vihos-full/xlmr-base",
+      "metrics_identical_bytes": true,
+      "config_identical_bytes": true,
+      "provided_weight_sha256_prefix": "94d1d9920cd479d8b61765aa5a5278ad"
+    },
+    {
+      "model": "xlmr-large",
+      "app_artifact_directory": "backend/artifacts/transformers/vihos-full/xlmr-large",
+      "metrics_identical_bytes": true,
+      "config_identical_bytes": true,
+      "provided_weight_sha256_prefix": "52d105d542a29ccb5a51cdd6a16a0b58"
+    }
+  ],
+  "notebook": {
+    "code_cells": 13,
+    "executed_cells": 0,
+    "output_blocks": 0
+  },
+  "import_git_commit": "77ccb364ec99595a438a41852b44ba4366d12f94",
+  "limitations": [
+    "Notebook contains no saved execution outputs.",
+    "Historical metrics do not include dataset hashes, training commit or execution timestamps.",
+    "A source import cannot establish that existing weights were trained from the current Git commit.",
+    "Imported train_vihos.py records dev_best from the final epoch, not the selected best checkpoint."
+  ]
+}
