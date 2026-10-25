@@ -26,3 +26,9 @@ training/runs/
 ~$*
 /notebooks/
 *.ipynb
+# Reports and Word documents are kept locally, not published to Git.
+*.doc
+*.docx
+/docs/BAO_CAO_TONG_HOP_VA_CAU_HOI_BAO_VE.md
+/docs/PHAN_TICH_THIET_KE_HE_THONG.md
+/docs/images/system/

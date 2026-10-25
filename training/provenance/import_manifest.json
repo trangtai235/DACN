@@ -113,39 +113,11 @@
       "source_entry": "KET QUA TRAIN - DAY DU.json"
     },
     {
-      "path": "training/evidence/imported/after/MINH CHUNG HUAN LUYEN.docx",
-      "size_bytes": 42310,
-      "sha256": "0c7fbfda69f0d3e6a78518f451490fbe7915457b555a50b33d36cd4aecf1252d",
-      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
-      "source_entry": "MINH CHUNG HUAN LUYEN.docx"
-    },
-    {
       "path": "training/evidence/imported/after/MINH CHUNG HUAN LUYEN.md",
       "size_bytes": 8587,
       "sha256": "c3275d5a78d4c1fb577d5a6bb3841d050c27870b64fd7cf428f94126c31182fb",
       "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
       "source_entry": "MINH CHUNG HUAN LUYEN.md"
-    },
-    {
-      "path": "training/evidence/imported/after/BANG CHI SO SO SANH.docx",
-      "size_bytes": 40516,
-      "sha256": "b05c9aa582a8dfb28701f862be66a17c3ead2d09561c870db6467f79f4926ea6",
-      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
-      "source_entry": "BANG CHI SO SO SANH.docx"
-    },
-    {
-      "path": "training/evidence/imported/after/KET QUA HUAN LUYEN - bang so sanh mo hinh.docx",
-      "size_bytes": 42614,
-      "sha256": "0cee99364d5a2b6d4fca76454e0fe6a556c2817c9bcd5fcc9cbcbae24a647973",
-      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
-      "source_entry": "KET QUA HUAN LUYEN - bang so sanh mo hinh.docx"
-    },
-    {
-      "path": "training/evidence/imported/after/GUIDELINE GAN NHAN v1.0.docx",
-      "size_bytes": 45648,
-      "sha256": "4579b2813f8f4e4c408663062a8a328c7b0698a37e9a8542f7cdbadd8eb527e0",
-      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
-      "source_entry": "GUIDELINE GAN NHAN v1.0.docx"
     },
     {
       "path": "training/evidence/imported/after/metrics/xlmr-large.json",
@@ -326,6 +298,38 @@
       "source_archive": "1 - DU LIEU TRUOC KHI TRAIN.zip",
       "source_entry": "notebooks/Colab - Train ViHOS.ipynb",
       "reason": "Removed from distributed source at user request; archive record retained for provenance."
+    },
+    {
+      "path": "training/evidence/imported/after/MINH CHUNG HUAN LUYEN.docx",
+      "size_bytes": 42310,
+      "sha256": "0c7fbfda69f0d3e6a78518f451490fbe7915457b555a50b33d36cd4aecf1252d",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "MINH CHUNG HUAN LUYEN.docx",
+      "reason": "Word document kept locally, excluded from Git at user request."
+    },
+    {
+      "path": "training/evidence/imported/after/BANG CHI SO SO SANH.docx",
+      "size_bytes": 40516,
+      "sha256": "b05c9aa582a8dfb28701f862be66a17c3ead2d09561c870db6467f79f4926ea6",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "BANG CHI SO SO SANH.docx",
+      "reason": "Word document kept locally, excluded from Git at user request."
+    },
+    {
+      "path": "training/evidence/imported/after/KET QUA HUAN LUYEN - bang so sanh mo hinh.docx",
+      "size_bytes": 42614,
+      "sha256": "0cee99364d5a2b6d4fca76454e0fe6a556c2817c9bcd5fcc9cbcbae24a647973",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "KET QUA HUAN LUYEN - bang so sanh mo hinh.docx",
+      "reason": "Word document kept locally, excluded from Git at user request."
+    },
+    {
+      "path": "training/evidence/imported/after/GUIDELINE GAN NHAN v1.0.docx",
+      "size_bytes": 45648,
+      "sha256": "4579b2813f8f4e4c408663062a8a328c7b0698a37e9a8542f7cdbadd8eb527e0",
+      "source_archive": "2 - KET QUA SAU KHI TRAIN.zip",
+      "source_entry": "GUIDELINE GAN NHAN v1.0.docx",
+      "reason": "Word document kept locally, excluded from Git at user request."
     }
   ]
 }
