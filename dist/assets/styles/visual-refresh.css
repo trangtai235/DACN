@@ -259,68 +259,6 @@ body:not(.is-auth) .auto-filters .check-row { margin: 0; flex: none; font-size: 
 .auto-agree { font-size: 11px; }
 .auto-pagination { margin-top: 20px; gap: 13px; }
 
-/* Dark provider settings use the same navy/blue palette and control rhythm. */
-.provider-settings { background: #1b2a40; border-color: #34465f; border-radius: 17px; color: #e7edf5; min-height: 680px; grid-template-columns: 200px minmax(0,1fr); }
-.ps-sidebar { background: #16253a; border-color: #33465e; padding: 26px 13px; }
-.ps-sidebar h2 { font-size: 17px; margin-bottom: 26px; }
-.ps-sidebar nav { gap: 9px; }
-.ps-sidebar nav a { color: #c2cfdf; font-size: 13px; min-height: 45px; padding: 12px; border-radius: 9px; }
-.ps-sidebar nav a:hover { background: #223a56; }
-.ps-sidebar nav a.selected { background: #2d4664; color: #f8fbff; }
-.ps-sidebar-note { color: #a0b3c9; font-size: 11px; }
-.ps-sidebar-note b { color: #c2d1e2; }
-.ps-content { padding: 29px; }
-.ps-heading { margin-bottom: 25px; gap: 20px; flex-wrap: wrap; }
-.ps-heading h1 { color: #f0f5fb; font-size: 26px; line-height: 1.4; }
-.ps-heading p { color: #afc1d6; font-size: 13px; line-height: 1.85; }
-.ps-eyebrow { color: #8ba4c0; }
-.ps-button { min-height: 40px; padding: 9px 13px; color: #d8e6f6; border-color: #526982; border-radius: 9px; font-size: 12px; }
-.ps-button:hover { background: #304865; border-color: #7892ad; }
-.ps-danger { color: #ffb0b8; border-color: transparent; }
-.ps-danger:hover { background: #59333f; border-color: #966276; }
-.ps-primary { background: #dceaff; color: #203954; border-color: #dceaff; }
-.ps-primary:hover { background: #eef5ff; border-color: #eef5ff; }
-.ps-default { padding: 18px; border-color: #3b506b; background: #203149; border-radius: 12px; gap: 10px 18px; }
-.ps-default label { font-size: 12px; color: #c9d8e9; line-height: 1.7; }
-.ps-default small { color: #9fb4cd; line-height: 1.8; font-size: 11px; }
-body:not(.is-auth) .provider-settings select,
-body:not(.is-auth) .ps-dialog select,
-body:not(.is-auth) .ps-dialog input:not([type=checkbox]):not([type=radio]):not([type=hidden]),
-body:not(.is-auth) .ps-dialog textarea { background: #142237; border: 1px solid #526982; border-radius: 9px; color: #e2edfa; font-size: 13px; min-height: 43px; }
-.ps-providers { gap: 13px; }
-.ps-card { padding: 20px; border-color: #465b75; border-radius: 14px; background: #21334b; gap: 18px; }
-.ps-card-title { gap: 10px; }
-.ps-card-title h2 { color: #edf4fc; font-size: 15px; line-height: 1.7; }
-.ps-card-title p { color: #adc1d9; font-size: 11px; line-height: 1.85; }
-.ps-custom { color: #c0d0e3; border-color: #667e98; font-size: 10px; }
-.ps-active { color: #cce3ff; background: #354f71; }
-.ps-card-actions { flex-wrap: wrap; gap: 8px; }
-.ps-add { border-color: #607994; background: #1b2c43; margin-top: 16px; min-height: 54px; color: #d0e0f3; font-size: 13px; }
-.ps-local { border-color: #435871; margin-top: 27px; }
-.ps-local > summary { color: #d0deee; font-size: 13px; line-height: 1.8; }
-.ps-local > summary small, .ps-local p { color: #a4b8d1; font-size: 12px; }
-.ps-local label { color: #c1d0e3; }
-.ps-notice { background: #243b56; border-color: #506a87; color: #c3d4e8; }
-.ps-dialog.modal { background: #203149; border-color: #4c6582; color: #e3edfa; }
-.ps-dialog .modal-head { border-color: #425974; }
-.ps-dialog .modal-head h2 { color: #eff5fc; font-size: 17px; }
-.ps-dialog .modal-head .btn { color: #d2e1f2; background: transparent; border-color: #536d8a; }
-.ps-dialog .modal-body { background: #203149; }
-.ps-field { color: #ccdced; font-size: 12px; line-height: 1.8; margin-bottom: 19px; }
-.ps-field small, .ps-key-state { color: #a3b9d2; }
-.ps-key-input { gap: 10px; }
-.ps-key-input input { min-width: 0; }
-.ps-key-input .ps-button { flex: none; }
-.ps-field input::placeholder { color: #91a6c0; }
-.ps-form-options { gap: 15px; }
-.ps-form-options label { color: #c3d5eb; font-size: 12px; line-height: 1.8; white-space: normal; }
-.ps-check-result { background: #19293f; border-color: #4b6380; color: #bacee7; }
-.ps-check-result.success { background: #183d37; border-color: #3d796a; color: #afe1cf; }
-.ps-check-result.failed { background: #482d3b; border-color: #8c5067; color: #f1b0c4; }
-.ps-dialog p { color: #bfd0e6; }
-.ps-dialog-actions { background: #203149; border-top-color: #47607d; }
-.ps-json { background: #142236; border-color: #4e6682; color: #c7dbf4; }
-
 /* Modals keep their header and controls readable without overflowing the page. */
 .modal-backdrop { padding: 24px; background: rgb(13 30 51 / 42%); backdrop-filter: blur(5px); }
 .modal { width: min(600px,100%); max-height: calc(100dvh - 48px); display: flex; flex-direction: column; overflow: hidden; border-radius: 16px; border: 1px solid #dbe5ef; box-shadow: 0 24px 80px rgb(12 33 57 / 22%); }
@@ -329,8 +267,6 @@ body:not(.is-auth) .ps-dialog textarea { background: #142237; border: 1px solid 
 .modal-head h2 { min-width: 0; line-height: 1.6; color: #2a4765; font-size: 17px; }
 .modal-head .icon-btn { min-width: 38px; flex: none; }
 .modal-body { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 24px; font-size: 13px; line-height: 1.8; }
-.ps-dialog.modal { width: min(650px,100%); }
-.ps-dialog .modal-body { padding: 24px; }
 .toast { font-size: 13px; padding: 16px 20px; border-radius: 11px; max-width: min(520px,calc(100vw - 32px)); box-shadow: 0 12px 40px rgb(20 45 75 / 13%); }
 .project-danger-zone { border-radius: 12px; padding: 22px 24px; gap: 20px; }
 .project-danger-zone > div { min-width: 0; }
@@ -342,10 +278,6 @@ body:not(.is-auth) .ps-dialog textarea { background: #142237; border: 1px solid 
   .main { padding: 27px 25px 40px; }
   .topbar { padding: 15px 25px; gap: 14px; }
   .split-grid { grid-template-columns: minmax(0,1fr); }
-  .provider-settings { grid-template-columns: 175px minmax(0,1fr); }
-  .ps-content { padding: 24px; }
-  .ps-default { grid-template-columns: minmax(0,1fr); }
-  .ps-default small { grid-column: 1; }
   .auto-chart-layout { gap: 19px; }
   .auto-donut { width: 126px; height: 126px; }
   .auto-donut > div { width: 94px; height: 94px; }
@@ -393,18 +325,6 @@ body:not(.is-auth) .ps-dialog textarea { background: #142237; border: 1px solid 
   .auto-run-picker > a { margin-left: 0; }
   .auto-filters > input { flex-basis: 100%; }
   .auto-filters > span { margin-left: 0; }
-  .provider-settings { grid-template-columns: minmax(0,1fr); border-radius: 14px; }
-  .ps-sidebar { border-right: 0; border-bottom: 1px solid #33465e; padding: 18px 15px; }
-  .ps-sidebar h2 { margin: 0 8px 14px; }
-  .ps-sidebar nav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
-  .ps-sidebar nav a { min-width: 0; font-size: 12px; gap: 9px; }
-  .ps-sidebar-note { display: none; }
-  .ps-content { padding: 22px 18px; }
-  .ps-card { flex-direction: column; align-items: stretch; padding: 18px; gap: 15px; }
-  .ps-card-actions { justify-content: flex-end; }
-  .ps-local > summary { flex-wrap: wrap; }
-  .ps-local > summary small { width: 100%; margin-left: 28px; }
-  .ps-heading h1 { font-size: 24px; }
   .project-danger-zone { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 480px) {
@@ -452,19 +372,11 @@ body:not(.is-auth) .ps-dialog textarea { background: #142237; border: 1px solid 
   .auto-comparison { padding: 3px 18px; }
   .auto-comparison strong { font-size: 18px; }
   body:not(.is-auth) .auto-filters .check-row { white-space: normal; }
-  .ps-content { padding: 21px 16px; }
-  .ps-default { padding: 15px; }
-  .ps-card { padding: 17px; }
-  .ps-button { min-height: 42px; }
   .modal-backdrop { padding: 12px; }
-  .modal, .ps-dialog.modal { max-height: calc(100dvh - 24px); width: 100%; border-radius: 13px; }
+  .modal { max-height: calc(100dvh - 24px); width: 100%; border-radius: 13px; }
   .modal-head { padding: 18px 19px; }
   .modal-head h2 { font-size: 16px; }
-  .modal-body, .ps-dialog .modal-body { padding: 20px; }
-  .ps-dialog-actions { margin: 18px -20px -20px; padding: 15px 20px; bottom: -20px; }
-  .ps-form-options { display: grid; grid-template-columns: minmax(0,1fr); }
-  .ps-dialog-actions > .ps-button { flex: 1; }
-  .ps-dialog-actions [data-test-button] { flex-basis: 100%; }
+  .modal-body { padding: 20px; }
   .modal-actions { gap: 9px; }
   .modal-actions .btn { flex: 1 1 auto; }
   .table-wrap th, .table-wrap td { padding: 13px; }

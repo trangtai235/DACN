@@ -1,5 +1,5 @@
-import {esc,icon} from '../../core/ui.js?v=78e859b430db';
-import {commentCard} from '../annotation/comment-card.js?v=78e859b430db';
+import {esc,icon} from '../../core/ui.js?v=00d8c624ac88';
+import {commentCard} from '../annotation/comment-card.js?v=00d8c624ac88';
 
 const button=(text,action,extra='',style='')=>`<button type="button" class="btn ${style}" data-action="collaboration:${action}" ${extra}>${text}</button>`;
 const color=l=>/^#[0-9a-f]{6}$/i.test(l?.color||'')?l.color:'#6d85a4';

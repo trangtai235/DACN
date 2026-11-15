@@ -1,11 +1,11 @@
-import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery,scopeDraftKind} from '../../core/annotation-scope.js?v=78e859b430db';
-import {state,DEMO} from '../../core/state.js?v=78e859b430db';
-import {api,projectQuery,exportFile} from '../../core/api.js?v=78e859b430db';
-import {refresh,navigate} from '../../core/events.js?v=78e859b430db';
-import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=78e859b430db';
-import {esc,heading,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=78e859b430db';
-import {workspace,suggestion} from './workspace.js?v=78e859b430db';
-import {administration} from './administration.js?v=78e859b430db';
+import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery,scopeDraftKind} from '../../core/annotation-scope.js?v=00d8c624ac88';
+import {state,DEMO} from '../../core/state.js?v=00d8c624ac88';
+import {api,projectQuery,exportFile} from '../../core/api.js?v=00d8c624ac88';
+import {refresh,navigate} from '../../core/events.js?v=00d8c624ac88';
+import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=00d8c624ac88';
+import {esc,heading,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=00d8c624ac88';
+import {workspace,suggestion} from './workspace.js?v=00d8c624ac88';
+import {administration} from './administration.js?v=00d8c624ac88';
 
 let data={},rows=[],runId='',current=null,inspection=null,projectId=null,queueFilter='all',scopeId='';
 let labelCatalog={labels:[]},pairDraft=null,restorePairId=null,requestSequence=0,predictionRefreshing=false;

@@ -1,7 +1,7 @@
-import {state,DEMO} from '../../core/state.js?v=78e859b430db';
-import {api,projectQuery,exportFile} from '../../core/api.js?v=78e859b430db';
-import {refresh} from '../../core/events.js?v=78e859b430db';
-import {esc,heading,panel,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=78e859b430db';
+import {state,DEMO} from '../../core/state.js?v=00d8c624ac88';
+import {api,projectQuery,exportFile} from '../../core/api.js?v=00d8c624ac88';
+import {refresh} from '../../core/events.js?v=00d8c624ac88';
+import {esc,heading,panel,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=00d8c624ac88';
 let data={runs:[],claimed:[],conflicts:[]},task=null,adjudicating=false;
 export async function load(){if(!DEMO)data=await api('studio/budget'+projectQuery());}
 export function render(){if(DEMO)return empty('Cần bản native','Không tạo thực nghiệm giả trong demo tĩnh.');return heading('Kiểm tra theo ngân sách','Grouping local–API nhiều lớp. P3 đo proxy thay đổi nhãn/thời gian hoạt động.',state.workspace.project.can_manage?btn('Tạo phiên','budget:create','primary'):'')+`<div class="info-banner">Đồng hồ cộng tối đa 20 giây giữa các heartbeat. Ẩn tab sẽ tạm dừng; mất mạng được ghi thời gian chờ. Đây là phép đo vận hành, không phải thời gian lao động chuẩn hóa.</div>`+panel('Mẫu đang làm',data.claimed.map(t=>`<p>#${t.comment_id} ${btn('Tiếp tục lượt mù','budget:open','primary','',`data-id="${t.id}"`)}</p>`).join('')||'<p>Chưa nhận mẫu.</p>')+panel('Phiên đã chốt quần thể',data.runs.map(r=>`<article class="review-run"><b>#${r.id} · ${esc(r.policy)} · ${esc(r.state)}</b><p>${Math.round(r.used_seconds)}/${r.budget_seconds}s · ${r.completed} xong · ${r.conflicts} cần phân xử</p>${btn('Nhận mẫu mù','budget:claim','sm','',`data-id="${r.id}"`)}${state.workspace.project.can_manage?btn(r.state==='paused'?'Tiếp tục phiên':'Tạm dừng phiên','budget:control','sm','',`data-id="${r.id}" data-mode="${r.state==='paused'?'resume':'pause'}"`)+btn('Tải báo cáo JSON','budget:report','sm','',`data-id="${r.id}"`)+btn('Replay nhiều seed','budget:replay','sm','',`data-id="${r.id}"`):''}</article>`).join(''))+panel('Phân xử người thứ ba',data.conflicts.map(t=>`<p>${esc(t.text)} ${btn('Phân xử','budget:gold','sm','',`data-id="${t.id}"`)}</p>`).join('')||'<p>Không có mẫu phù hợp.</p>');}

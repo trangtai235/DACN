@@ -1,5 +1,27 @@
 # Xác minh AnnotaFlow Studio 3
 
+## Đồng bộ giao diện Mô hình & API — 15/11/2026
+
+Trang `#models` dùng cùng heading/panel/button/input/modal sáng của workspace. Bỏ menu
+cài đặt lồng bên trong; hai thẻ chọn LLM API và model Local đặt cạnh nhau trên desktop,
+xếp dọc trên mobile. Danh sách nhà cung cấp giữ Model ID, trạng thái kiểm tra, mặc định,
+chỉnh sửa và xóa. Loại bỏ các override tối trong visual-refresh để chỉ dùng style chung.
+
+**15 kiểm thử hồi quy, OK**, 36,172 giây: API nhà cung cấp và ba luồng browser hiện có
+(quản lý nhãn, HITL/ngân sách, phạm vi video). Không đổi backend hay migration.
+Build đã cập nhật cache version; cú pháp và import của **70 module source/build** qua.
+[Log hồi quy](../backend/private_data/verification/models-ui-regression.log).
+
+Kiểm tra browser bổ sung trên database SQLite cách ly: **1 lượt QA, OK**. Các độ rộng
+360/768/1440/1920px không tràn ngang; trang và hộp thoại đều có nền trắng, nút/form dùng
+style chung. Sửa và tạo nhà cung cấp rồi reload giữ dữ liệu; xóa rồi reload mất đúng
+kết nối đã xóa; API key đã lưu không được điền lại vào ô nhập hoặc xuất ra cấu hình.
+Kiểm tra kết nối dùng HTTP mock, không gọi nhà cung cấp thật. Không sửa lựa chọn model,
+API key hoặc kết nối trên PostgreSQL của người dùng.
+[Kết quả QA](../backend/private_data/verification/models-light-qa.json),
+[ảnh desktop](../backend/private_data/verification/models-light-1440.png),
+[hộp thoại mobile](../backend/private_data/verification/models-light-dialog-360.png).
+
 ## Sửa trạng thái model và tiếp tục gợi ý theo video — 15/11/2026
 
 Lượt cuối: **147 tests, OK**, 72,979 giây, gồm ba luồng browser cách ly và vòng đời Chrome

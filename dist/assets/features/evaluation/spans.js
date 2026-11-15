@@ -1,4 +1,4 @@
-import {T,esc,heading,btn,panel,pct,num} from '../../core/ui.js?v=78e859b430db';
+import {T,esc,heading,btn,panel,pct,num} from '../../core/ui.js?v=00d8c624ac88';
 
 export function renderSpans(model){
  const report=model.report,metrics=report.span_metrics||{};
