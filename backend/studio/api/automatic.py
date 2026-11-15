@@ -32,14 +32,22 @@ def summary(run):
             'model': run.model_config.get('name'), 'connection': run.connection_config.get('name'),
             'local': job_summary(run.local_job, run, 'local'), 'llm': job_summary(run.llm_job, run, 'llm')}
 
+def belongs_to_source(run,source):
+    if not source:return True
+    ids={item['id'] for item in run.items}
+    return bool(ids) and not ids.difference(Comment.objects.filter(project=run.project,source=source,pk__in=ids).values_list('pk',flat=True))
+
 
 @api
 @require_GET
 def runs(request):
     project = project_for(request, request.GET['project'])
+    source=resolve_source(project,request.GET.get('source'))
+    if in_blind(project,request.user):raise PermissionError('Không xem gợi ý trong lượt mù.')
     connection = configured_connection(project)
-    return JsonResponse({'runs': [summary(r) for r in project.auto_label_runs.select_related('local_job', 'llm_job').order_by('-id')[:30]],
-                         'api_ready': bool(connection), 'connection': connection.name if connection else None})
+    return JsonResponse({'scope_source_id':source.pk if source else None,'runs': [summary(r) for r in project.auto_label_runs.filter(schema__isnull=True).select_related('local_job', 'llm_job').order_by('-id')[:100] if belongs_to_source(r,source)][:30],
+                         'api_ready': bool(connection), 'connection': connection.name if connection else None,
+                         'connection_id':connection.pk if connection else None})
 
 
 @api
@@ -69,17 +77,17 @@ def start(request):
         else:
             config['artifact_sha256'] = artifact_digest(model.artifact_path)
         qs = project.comments.filter(unusable=False).select_related('source').order_by('id')
-        if p.get('source_id'):
-            source = get_object_or_404(Source, pk=p['source_id'], project=project)
+        source=resolve_source(project,p.get('source_id'))
+        if source:
             qs = qs.filter(source=source)
-        items = [{'id': c.pk, 'text': c.text, 'source': c.source.name} for c in qs]
+        items = [{'id': c.pk, 'text': c.text, 'source': c.source.name,'source_id':c.source_id} for c in qs]
         if not items:
             raise ValueError('Chưa có bình luận hợp lệ trong phạm vi đã chọn.')
         connection = configured_connection(project)
         if connection:
             validate_endpoint(connection.base_url)
         run = AutoLabelRun.objects.create(project=project, actor=request.user, labels=labels, items=items,
-                                         model_config=config, connection_config=snapshot(connection) if connection else {})
+                                         model_config=config, connection_config=snapshot(connection) if connection else {},options={'source_id':source.pk if source else None})
         run.local_job = enqueue(project, request.user, 'auto_label', {'run_id': run.pk, 'branch': 'local'})
         if connection:
             run.llm_job = enqueue(project, request.user, 'auto_label', {'run_id': run.pk, 'branch': 'llm'})
@@ -108,6 +116,9 @@ def result_rows(run):
 def detail(request, run_id):
     run = get_object_or_404(AutoLabelRun.objects.select_related('local_job', 'llm_job'), pk=run_id)
     project_for(request, run.project_id)
+    source=resolve_source(run.project,request.GET.get('source'))
+    if not belongs_to_source(run,source):raise ValueError('Lượt này chứa video/nguồn khác. Chọn hoặc tạo một lượt riêng cho nguồn đang gán.')
+    if in_blind(run.project,request.user):raise PermissionError('Không xem/xuất dự đoán trong lượt mù.')
     rows = list(result_rows(run))
     paired = [r for r in rows if r['local'] and r['llm']]
     differences = sum(r['different'] for r in paired)
@@ -140,6 +151,8 @@ def control(request, run_id):
     with transaction.atomic():
         run = get_object_or_404(AutoLabelRun.objects.select_for_update(), pk=run_id)
         project_for(request, run.project_id, True)
+        source=resolve_source(run.project,p.get('source_id'))
+        if not belongs_to_source(run,source):raise ValueError('Không chạy lại lượt chứa nhiều video trong phạm vi một video.')
         branch = p.get('branch')
         if branch not in ('local', 'llm'):
             raise ValueError('Luồng không hợp lệ.')

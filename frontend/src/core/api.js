@@ -6,7 +6,7 @@ export async function api(path,body){
  const csrf=document.cookie.split('; ').find(s=>s.startsWith('csrftoken='))?.split('=')[1]||'';
  const opts={method:body?'POST':'GET',credentials:'same-origin',headers:{'X-CSRFToken':csrf}};
  if(body instanceof FormData)opts.body=body;else if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
- const r=await fetch('/api/'+path,opts);let data;try{data=await r.json();}catch{throw new Error('Máy chủ không trả JSON. Kiểm tra backend và log tác vụ.');}
+ const r=await fetch('/api/'+path,opts);let data;try{data=await r.json();}catch{throw new Error(r.status>=500?`Máy chủ gặp lỗi (HTTP ${r.status}). Kiểm tra log backend.`:r.status===403?'Yêu cầu bị từ chối (HTTP 403). Tải lại trang để cập nhật phiên đăng nhập.':`API trả phản hồi không hợp lệ (HTTP ${r.status}). Kiểm tra phiên bản backend đang chạy.`);}
  if(!r.ok)throw new Error(data.error||'Không thể thực hiện thao tác ('+r.status+').');return data;
 }
 export async function boot(id){state.workspace=await api('bootstrap'+(id?'?project='+id:''));return state.workspace;}

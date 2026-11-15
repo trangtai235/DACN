@@ -3,3 +3,4 @@ from .annotations import Annotation,AnnotationEvent,GoldAnnotation,AIExposure
 from .versions import DatasetVersion,ExportArtifact
 from .accounts import UserProfile
 from .automatic import AutoLabelRun,AutoLabelResult
+from .collaboration import LabelSchema,PredictionPair,PairDecision,FeedbackApproval,DataPartition,FeedbackDataset

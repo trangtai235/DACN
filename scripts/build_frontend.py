@@ -27,4 +27,4 @@ index=out/'index.html'
 text=index.read_text(encoding='utf-8')
 text=re.sub(r'(/assets/[^"?]+\.(?:js|css))',lambda m:f'{m[1]}?v={version}',text)
 index.write_text(text,encoding='utf-8')
-print('Built frontend/ → dist/ (no npm required).')
+print('Built frontend/ -> dist/ (no npm required).')

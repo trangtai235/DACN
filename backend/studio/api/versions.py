@@ -35,14 +35,17 @@ def version_restore(request,version_id):
     if p.get('confirm')!=v.name:raise ValueError('Nhập tên phiên bản để xác nhận khôi phục lớp nhãn.')
     with transaction.atomic():
         mutation_guard(project,request.user,True)
+        from studio.services.adaptation import current_schema
+        current_schema(project)
         backup=create_version(project,request.user,'Trước khôi phục · '+timezone.now().isoformat())
         for l in v.snapshot['labels']:
-            ProjectLabel.objects.update_or_create(project=project,key=l['key'],defaults={k:l[k] for k in ('name','description','color','enabled','order')})
+            ProjectLabel.objects.update_or_create(project=project,key=l['key'],defaults={**{k:l[k] for k in ('name','description','color','enabled','order')},'exclusions':l.get('exclusions','')})
         count=0
         for row in v.snapshot['comments']:
             c=Comment.objects.select_for_update().filter(project=project,pk=row['id'],text=row['text']).first()
             if not c:continue
             revisions=dict(Annotation.objects.filter(comment=c).values_list('user_id','revision'))
+            gold_revision=GoldAnnotation.objects.filter(comment=c).values_list('revision',flat=True).first() or 0
             Annotation.objects.filter(comment=c).delete();GoldAnnotation.objects.filter(comment=c).delete()
             for a in row['annotators']:
                 u=User.objects.filter(pk=a['user_id']).first()
@@ -50,8 +53,9 @@ def version_restore(request,version_id):
                 lab=ProjectLabel.objects.filter(project=project,key=a['label']).first() if a['label'] else None
                 Annotation.objects.create(comment=c,user=u,label=lab,spans=a['spans'],note=a['note'],status=a.get('status','submitted'),assisted=a['assisted'],seconds=a.get('seconds',0),revision=max(a['revision'],revisions.get(u.id,0))+1)
             if row.get('gold_label') and row['review_status']=='adjudicated':
-                lab=ProjectLabel.objects.get(project=project,key=row['gold_label']) if row['gold_label']!='O' else None;GoldAnnotation.objects.create(comment=c,label=lab,spans=[{k:s[k] for k in ('start','end','label')} for s in row['spans']],note='Khôi phục phiên bản '+v.name,adjudicator=request.user)
+                lab=ProjectLabel.objects.get(project=project,key=row['gold_label']) if row['gold_label']!='O' else None;GoldAnnotation.objects.create(comment=c,label=lab,spans=[{k:s[k] for k in ('start','end','label')} for s in row['spans']],note='Khôi phục phiên bản '+v.name,adjudicator=request.user,revision=gold_revision+1)
             count+=1
+        current_schema(project)
         result=create_version(project,request.user,'Khôi phục · '+v.name,restored_from=v);audit(project,request.user,'version_restored',source=v.id,backup=backup.id,version=result.id)
     return JsonResponse({'restored_comments':count,'backup_version':backup.id,'version':result.id,'scope':'Khôi phục lớp nhãn trên mẫu cùng ID và văn bản; giữ mẫu khác và nhãn lượt đầu nghiên cứu.'})
 

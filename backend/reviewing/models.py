@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from core.models import Project,Comment,LABELS
 class ReviewRun(models.Model):
+    grouping_strategy=models.CharField(max_length=32,default='legacy_ai_human')
+    input_snapshot=models.JSONField(default=dict)
     project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='review_runs')
     policy=models.CharField(max_length=20,default='adaptive')
     budget_seconds=models.PositiveIntegerField(default=1800)
@@ -14,8 +16,9 @@ class ReviewTask(models.Model):
     run=models.ForeignKey(ReviewRun,on_delete=models.CASCADE,related_name='tasks')
     comment=models.ForeignKey(Comment,on_delete=models.PROTECT)
     reviewer=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='review_tasks')
-    blind_label=models.CharField(max_length=16,choices=LABELS,null=True)
-    final_label=models.CharField(max_length=16,choices=LABELS,null=True)
+    blind_label=models.CharField(max_length=64,null=True)
+    final_label=models.CharField(max_length=64,null=True)
+    clock=models.JSONField(default=dict)
     note=models.TextField(blank=True)
     state=models.CharField(max_length=30,default='claimed')
     reason=models.CharField(max_length=160)

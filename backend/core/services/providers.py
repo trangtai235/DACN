@@ -25,7 +25,7 @@ def local_predict(project,texts,model_id=None):
     if not any(path.is_relative_to(p) for p in allowed):raise ValueError('Đường dẫn model không hợp lệ.')
     if run.algorithm=='transformer_bio':
         from studio.services.projects import labels_for
-        if not {'TOXIC','NON_TOXIC'}.issubset({l['key'] for l in labels_for(project)}):raise ValueError('Model BIO cần hai nhãn TOXIC và NON_TOXIC đang bật.')
+        if {'TOXIC','NON_TOXIC'}!={l['key'] for l in labels_for(project)}:raise ValueError('Model BIO chỉ tương thích đúng hai nhãn TOXIC và NON_TOXIC; không dùng cho bộ nhãn mở rộng.')
         from .transformer_models import predict
         return predict(run,texts)
     artifact=path/'classifier.joblib';model=load_artifact(str(artifact),artifact.stat().st_mtime_ns)

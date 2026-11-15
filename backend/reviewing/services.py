@@ -7,6 +7,9 @@ from .models import ReviewRun,ReviewTask
 def group_for(ai,human):
     return {('TOXIC','TOXIC'):'A',('NON_TOXIC','NON_TOXIC'):'B',('NON_TOXIC','TOXIC'):'C',('TOXIC','NON_TOXIC'):'D'}[(ai,human)]
 def group_stats(run,batched=False):
+    if run.grouping_strategy=='local_api':
+        from .paired import stats
+        return stats(run)
     stats={g:{'n':0,'changed':0,'seconds':0,'score':0} for g in 'ABCD'}
     tasks=list(run.tasks.filter(state='complete').select_related('comment').order_by('id'))
     if batched:tasks=tasks[:len(tasks)//5*5]
@@ -19,6 +22,9 @@ def group_stats(run,batched=False):
 @transaction.atomic
 def claim(run_id,user):
     run=ReviewRun.objects.select_for_update().get(pk=run_id)
+    if run.grouping_strategy=='local_api':
+        from .paired import claim as paired_claim
+        return paired_claim(run_id,user)
     existing=run.tasks.filter(reviewer=user,state='claimed').select_related('comment').first()
     if existing:return existing
     if run.state!='active' or run.used_seconds>=run.budget_seconds:raise ValueError('Phiên đã dừng hoặc hết ngân sách.')
@@ -46,6 +52,9 @@ def claim(run_id,user):
 @transaction.atomic
 def submit(task_id,user,label,note=''):
     task=ReviewTask.objects.select_for_update().select_related('comment','run').get(pk=task_id)
+    if task.run.grouping_strategy=='local_api':
+        from .paired import submit as paired_submit
+        return paired_submit(task_id,user,label,note)
     if task.reviewer_id!=user.id:raise PermissionError('Không phải lượt kiểm tra được giao.')
     if task.state!='claimed':raise ValueError('Lượt này đã được nộp; không ghi lại lần hai.')
     if label not in ('TOXIC','NON_TOXIC'):raise ValueError('Nhãn không hợp lệ.')
@@ -60,6 +69,9 @@ def submit(task_id,user,label,note=''):
 @transaction.atomic
 def start_adjudication(task_id,user):
     task=ReviewTask.objects.select_for_update().select_related('comment','run').get(pk=task_id)
+    if task.run.grouping_strategy=='local_api':
+        from .paired import open_adjudication
+        return open_adjudication(task_id,user)
     if task.state!='conflict':raise ValueError('Mẫu không còn chờ phân xử.')
     if user.id in (task.reviewer_id,task.comment.first_actor_id):raise PermissionError('Người phân xử phải khác hai người đã gán nhãn.')
     if task.adjudicator_id and task.adjudicator_id!=user.id:raise ValueError('Mẫu đã có người đang phân xử.')
@@ -67,6 +79,9 @@ def start_adjudication(task_id,user):
     return task
 @transaction.atomic
 def adjudicate(task_id,user,label,note):
+    if ReviewTask.objects.get(pk=task_id).run.grouping_strategy=='local_api':
+        from .paired import adjudicate as paired_adjudicate
+        return paired_adjudicate(task_id,user,label,note)
     task=start_adjudication(task_id,user)
     if label not in ('TOXIC','NON_TOXIC') or not note.strip():raise ValueError('Chọn nhãn và ghi lý do phân xử.')
     elapsed=max(.001,(timezone.now()-task.adjudication_started_at).total_seconds())

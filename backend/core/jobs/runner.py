@@ -33,7 +33,9 @@ def execute(job_id):
             from .benchmark import run as benchmark
             from .imports import run as imports
             from .auto_label import run as auto_label
-            handlers={'predict':predict,'train':training,'youtube':youtube,'benchmark_api':benchmark,'import_csv':imports,'auto_label':auto_label}
+            from studio.services.collaboration import run_branch
+            from .feedback_train import run as feedback_train
+            handlers={'predict':predict,'train':training,'youtube':youtube,'benchmark_api':benchmark,'import_csv':imports,'auto_label':auto_label,'paired_predict':run_branch,'feedback_train':feedback_train}
             if job.kind not in handlers:raise ValueError('Loại tác vụ chưa đăng ký.')
             payload=json.loads(job.payload);result=handlers[job.kind](job,payload)
             tick(job,99,'Đang hoàn tất');job.status='complete';job.progress=100;job.message='Hoàn tất';job.result=json.dumps(result,ensure_ascii=False);job.save(update_fields=['status','progress','message','result','updated_at'])

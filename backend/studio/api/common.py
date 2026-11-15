@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from core.api import api,data,project_for,manager,in_blind,serialize_comment,report_job
 from core.models import Project,Membership,Source,Comment,Prediction,Job,audit
 from studio.models import *
-from studio.services.projects import ensure,labels_for,writable,label_for,validate_spans,mutation_guard
+from studio.services.projects import ensure,labels_for,writable,label_for,validate_spans,mutation_guard,resolve_source
 
 def pref_json(p):return {'guidelines':p.guidelines,'locked':p.locked,'archived':p.archived,'redundancy':p.redundancy,'independent':p.independent,'active_model_id':p.active_model_id,'active_connection_id':p.active_connection_id}
 def annotation_json(a):

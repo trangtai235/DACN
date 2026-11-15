@@ -14,7 +14,7 @@ def bootstrap(request):
     from studio.models import Annotation,AIExposure
     qs=Comment.objects.filter(project=project)
     stats={'total':qs.count(),'predicted':qs.filter(ai_label__isnull=False).count(),'first_pass':qs.filter(first_frozen_at__isnull=False).count(),'toxic':qs.filter(first_label='TOXIC').count()}
-    models=list(ModelRun.objects.filter(project=project,state='ready').order_by('-id')[:50]);benchmarks=list(BenchmarkRun.objects.filter(project=project).order_by('-id')[:5]) if is_manager and not blind else []
+    models=[] if blind else list(ModelRun.objects.filter(project=project,state='ready').order_by('-id')[:50]);benchmarks=list(BenchmarkRun.objects.filter(project=project).order_by('-id')[:5]) if is_manager and not blind else []
     runs=list(ReviewRun.objects.filter(project=project).order_by('-id')[:10])
     conflicts=ReviewTask.objects.filter(run__project=project,state='conflict').select_related('comment').exclude(reviewer=request.user).exclude(comment__first_actor=request.user)
     members=[{'id':m.user_id,'name':m.user.first_name or m.user.username,'username':m.user.username,'role':m.role} for m in project.memberships.select_related('user')]
@@ -23,7 +23,7 @@ def bootstrap(request):
     for row in qs[:500]:
         if row.ai_label and not blind and (not extra['preferences']['independent'] or Annotation.objects.filter(comment=row,user=request.user,status='submitted').exists()):AIExposure.objects.get_or_create(comment=row,user=request.user)
     return JsonResponse({**extra,'projects':[{'id':p.id,'name':p.name,'is_demo':p.is_demo,'owner':p.owner_id,'can_delete':p.owner_id==request.user.id,'archived':studio_ensure(p).archived} for p in projects],'project':{'id':project.id,'name':project.name,'description':project.description,'is_demo':project.is_demo,'can_manage':is_manager,'owner':project.owner_id},'stats':stats,'comments':[serialize_comment(r,blind or (extra['preferences']['independent'] and not Annotation.objects.filter(comment=r,user=request.user,status='submitted').exists())) for r in qs.select_related('source').order_by('id')[:500]],'models':[report_model(m) for m in models],'benchmarks':[{'id':b.id,'report':json.loads(b.report)} for b in benchmarks],'runs':[run_json(r) for r in runs] if is_manager and not blind else [{'id':r.id,'policy':r.policy,'budget_seconds':r.budget_seconds,'used_seconds':r.used_seconds,'state':r.state} for r in runs],
-     'conflicts':[{'id':t.id,'comment_id':t.comment_id,'text':t.comment.text} for t in conflicts],'members':members,'events':events,'jobs':[report_job(j) for j in Job.objects.filter(project=project,actor=request.user).order_by('-id')[:5]],'api_configured':bool(settings.GEMINI_API_KEY),'youtube_configured':bool(settings.YOUTUBE_API_KEY),'gemini_model':settings.GEMINI_MODEL,'user':{'id':request.user.id,'username':request.user.username,'name':request.user.first_name or request.user.username}})
+     'conflicts':[{'id':t.id,'comment_id':t.comment_id,'text':t.comment.text} for t in conflicts],'members':members,'events':events,'jobs':[] if blind else [report_job(j) for j in Job.objects.filter(project=project,actor=request.user).order_by('-id')[:5]],'api_configured':bool(settings.GEMINI_API_KEY),'youtube_configured':bool(settings.YOUTUBE_API_KEY),'gemini_model':settings.GEMINI_MODEL,'user':{'id':request.user.id,'username':request.user.username,'name':request.user.first_name or request.user.username}})
 
 
 @api

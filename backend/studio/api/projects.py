@@ -4,12 +4,15 @@ from django.core.validators import validate_email
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 from .common import *
-from studio.services.projects import PRESETS
+from studio.services.projects import PRESETS,label_json,label_used
 
 @api
 @require_POST
+@transaction.atomic
 def settings_view(request):
     p=data(request);project=project_for(request,p['project'],True);prefs=ensure(project)
+    from studio.services.adaptation import current_schema
+    current_schema(project)
     if p.get('action')=='delete':
         if project.owner_id!=request.user.id or p.get('confirm')!=project.name:raise PermissionError('Chủ dự án cần nhập đúng tên để xóa.')
         with transaction.atomic():
@@ -40,33 +43,58 @@ def settings_view(request):
         n=int(p['redundancy'])
         if not 1<=n<=5:raise ValueError('Số người trên mỗi mẫu từ 1 đến 5.')
         prefs.redundancy=n
-    prefs.save();audit(project,request.user,'project_settings_updated')
+    prefs.save();current_schema(project);audit(project,request.user,'project_settings_updated')
     return JsonResponse({'preferences':pref_json(prefs)})
 
 @api
-@require_POST
+@require_http_methods(['GET','POST'])
+@transaction.atomic
 def label_settings(request):
-    p=data(request);project=project_for(request,p['project'],True);writable(project)
+    p=request.GET if request.method=='GET' else data(request)
+    project=project_for(request,p['project'],request.method=='POST');prefs=ensure(project)
+    from studio.services.adaptation import current_schema
+    schema=current_schema(project)
+    if request.method=='GET':
+        from studio.services.adaptation import compatibility
+        can_manage=manager(project,request.user);rows=[]
+        for label in ProjectLabel.objects.filter(project=project):
+            used=label_used(project,label) if can_manage else None
+            rows.append({**label_json(label),'used':used,'can_delete':can_manage and not used})
+        return JsonResponse({'project':{'id':project.pk,'name':project.name},'labels':rows,
+            'can_manage':can_manage,'locked':prefs.locked,'archived':prefs.archived,
+            'schema':{'id':schema.pk,'version':schema.version,'sha256':schema.sha256},
+            'local_model':{'name':prefs.active_model.name if prefs.active_model_id else None,**compatibility(prefs.active_model,schema)}})
+    mutation_guard(project,request.user,True)
     if p.get('preset'):
         preset=PRESETS.get(p['preset'])
         if not preset:raise ValueError('Preset không hợp lệ.')
         if Annotation.objects.filter(comment__project=project).exists() or project.comments.filter(first_frozen_at__isnull=False).exists():raise ValueError('Dự án đã có nhãn người. Tạo dự án khác để đổi preset.')
         with transaction.atomic():
-            ProjectLabel.objects.filter(project=project).update(enabled=False)
+            for label in ProjectLabel.objects.filter(project=project):label.enabled=False;label.save()
             for i,(key,name,color,description) in enumerate(preset):ProjectLabel.objects.update_or_create(project=project,key=key,defaults={'name':name,'color':color,'description':description,'order':i,'enabled':True})
     else:
         key=str(p.get('key','')).strip().upper();name=str(p.get('name','')).strip();color=str(p.get('color','#4f78a5'))
-        if not re.fullmatch(r'[A-Z][A-Z0-9_]{0,63}',key) or not name or len(name)>120 or not re.fullmatch('#[0-9A-Fa-f]{6}',color):raise ValueError('Key gồm A-Z/0-9/_, tên tối đa 120 ký tự, màu #RRGGBB.')
-        obj=ProjectLabel.objects.filter(project=project,key=key).first()
-        if obj and p.get('action')=='delete':
-            used=Annotation.objects.filter(label=obj).exists() or GoldAnnotation.objects.filter(label=obj).exists()
-            if not used:
-                pools=[Annotation.objects.filter(comment__project=project).values_list('spans',flat=True),GoldAnnotation.objects.filter(comment__project=project).values_list('spans',flat=True),Prediction.objects.filter(comment__project=project).values_list('spans',flat=True)]
-                used=any(any(s.get('label')==key for s in spans) for pool in pools for spans in pool)
-            if used:raise ValueError('Nhãn đã dùng trong câu hoặc spans: chỉ tắt để giữ lịch sử.')
+        obj=get_object_or_404(ProjectLabel.objects.select_for_update(),project=project,pk=p['id']) if p.get('id') else ProjectLabel.objects.filter(project=project,key=key).first()
+        if obj and key!=obj.key:raise ValueError('Mã nhãn được giữ ổn định; tạo nhãn mới thay vì đổi mã.')
+        if p.get('id') and 'revision' not in p:raise ValueError('Cần revision của nhãn. Tải lại trước khi sửa.')
+        if obj and 'revision' in p and int(p['revision'])!=obj.revision:
+            return JsonResponse({'error':'Nhãn đã thay đổi ở phiên khác. Nội dung đang soạn được giữ; tải lại nhãn trước khi lưu.'},status=409)
+        if obj and p.get('action')=='create':raise ValueError('Mã nhãn đã tồn tại trong dự án.')
+        before=label_json(obj) if obj else None
+        if p.get('action')=='delete':
+            if not obj:raise ValueError('Không tìm thấy nhãn trong dự án.')
+            if label_used(project,obj):raise ValueError('Nhãn đã dùng trong câu, spans, dự đoán hoặc lịch sử: chỉ ngừng dùng để giữ dữ liệu.')
             obj.delete()
-        else:ProjectLabel.objects.update_or_create(project=project,key=key,defaults={'name':name,'description':str(p.get('description',''))[:3000],'color':color,'enabled':p.get('enabled',True),'order':int(p.get('order',0))})
-    audit(project,request.user,'labels_updated');return JsonResponse({'labels':labels_for(project,False)})
+        else:
+            if not re.fullmatch(r'[A-Z][A-Z0-9_]{0,63}',key) or not name or len(name)>120 or not re.fullmatch('#[0-9A-Fa-f]{6}',color):raise ValueError('Mã gồm A-Z/0-9/_, tên từ 1–120 ký tự, màu #RRGGBB.')
+            enabled=p.get('enabled',obj.enabled if obj else True);order=p.get('order',obj.order if obj else 0)
+            if type(enabled) is not bool or type(order) is bool or not 0<=int(order)<=9999:raise ValueError('Trạng thái phải là boolean và thứ tự từ 0 đến 9999.')
+            obj=obj or ProjectLabel(project=project,key=key)
+            for field,value in {'name':name,'description':str(p.get('description',''))[:3000],'exclusions':str(p.get('exclusions',''))[:3000],'color':color,'enabled':enabled,'order':int(order)}.items():setattr(obj,field,value)
+            obj.save()
+        audit(project,request.user,'label_deleted' if p.get('action')=='delete' else 'label_saved',before=before,after=label_json(obj) if obj.pk else None)
+    schema=current_schema(project)
+    audit(project,request.user,'labels_updated',schema=schema.pk);return JsonResponse({'labels':labels_for(project,False),'schema_version':schema.version})
 
 @api
 @require_POST

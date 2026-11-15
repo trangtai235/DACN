@@ -31,7 +31,9 @@ def import_references(request):
     with transaction.atomic():
         for row in rows:
             c=get_object_or_404(Comment,project=project,pk=int(row['id']));label=row['label']
-            if label not in ('TOXIC','NON_TOXIC'):raise ValueError('Nhãn tham chiếu phải là TOXIC hoặc NON_TOXIC.')
+            from studio.services.projects import label_for
+            label_for(project,label)
+            if c.prediction_pairs.exists():raise ValueError('Nhập tham chiếu trước khi chạy điều kiện có AI.')
             if c.first_frozen_at:raise ValueError('Nhập và khóa tham chiếu trước khi có lượt đầu để hạn chế rò rỉ đánh giá.')
             ReferenceLabel.objects.update_or_create(comment=c,defaults={'label':label,'created_by':request.user,'provenance':'CSV tham chiếu do nhóm cung cấp'});count+=1
         audit(project,request.user,'reference_imported',count=count)
@@ -44,6 +46,9 @@ def human_metrics(request):
     project=project_for(request,request.GET['project'],True)
     if in_blind(project,request.user):raise PermissionError('Không chấm nhãn khi đang làm lượt mù.')
     run=get_object_or_404(ReviewRun,project=project,pk=request.GET['run']) if request.GET.get('run') else None
+    if run and run.grouping_strategy=='local_api':
+        from reviewing.paired import report
+        return JsonResponse({'available':True,**report(run)})
     refs_qs=ReferenceLabel.objects.filter(comment__project=project,comment__first_frozen_at__isnull=False)
     if run:refs_qs=refs_qs.filter(comment_id__in=json.loads(run.population))
     refs=list(refs_qs.select_related('comment'))

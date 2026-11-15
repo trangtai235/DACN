@@ -3,11 +3,11 @@ from .base import prompt,result
 from integrations.secure_http import public_client
 from urllib.parse import urlsplit
 class OllamaAdapter:
-    def predict(self,text,labels,connection,key,sentence_only=False):
+    def predict(self,text,labels,connection,key,sentence_only=False,prompt_context=None):
         started=time.perf_counter();headers={'Authorization':'Bearer '+key} if key else {}
         local=urlsplit(connection.base_url).hostname in ('localhost','127.0.0.1','host.docker.internal')
         with (httpx.Client(timeout=180,follow_redirects=False,trust_env=False) if local else public_client(timeout=180)) as client:
-            response=client.post(connection.base_url.rstrip('/')+'/api/chat',headers=headers,json={'model':connection.model,'messages':[{'role':'user','content':prompt(text,labels,sentence_only)}],'stream':False,'format':'json','options':{'temperature':0}})
+            response=client.post(connection.base_url.rstrip('/')+'/api/chat',headers=headers,json={'model':connection.model,'messages':[{'role':'user','content':prompt(text,labels,sentence_only,prompt_context)}],'stream':False,'format':'json','options':{'temperature':0}})
         if response.status_code!=200:raise ValueError(f'Ollama HTTP {response.status_code}; kiểm tra server và model đã tải.')
         try:
             data=response.json();raw=data['message']['content']

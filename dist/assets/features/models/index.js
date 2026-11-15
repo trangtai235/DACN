@@ -1,7 +1,7 @@
-import {state,DEMO,currentModel} from '../../core/state.js?v=f62135f1ecf7';
-import {api,projectQuery} from '../../core/api.js?v=f62135f1ecf7';
-import {refresh,navigate} from '../../core/events.js?v=f62135f1ecf7';
-import {esc,icon,modal,closeModal,toast,download,nativeRequired} from '../../core/ui.js?v=f62135f1ecf7';
+import {state,DEMO,currentModel} from '../../core/state.js?v=332cf58721ec';
+import {api,projectQuery} from '../../core/api.js?v=332cf58721ec';
+import {refresh,navigate} from '../../core/events.js?v=332cf58721ec';
+import {esc,icon,modal,closeModal,toast,download,nativeRequired} from '../../core/ui.js?v=332cf58721ec';
 let config={connections:[],active_connection_id:null},exported=null,discovered=[];
 const button=(text,action,cls='',attrs='')=>`<button type="button" class="ps-button ${cls}" data-action="models:${action}" ${attrs}>${text}</button>`;
 const controls=c=>c.enabled&&c.check_status==='success'?'success':c.enabled&&c.check_status==='failed'?'failed':'unknown';

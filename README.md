@@ -1,5 +1,28 @@
 # AnnotaFlow Studio 3
 
+## Cập nhật M1–M3: phối hợp hai mô hình
+
+**Human-in-the-loop** nằm ở menu **Người duyệt nhãn (HITL)** (`#human-review`), cùng
+**Gán nhãn thủ công** (`#manual-annotation`). Bước chạy tự động mặc định chuyển sang hàng đợi
+người duyệt; nhãn người được xuất riêng và quản lý có thể duyệt phản hồi của thành viên khác.
+Xem [hướng dẫn HITL](docs/HUMAN_IN_THE_LOOP_VI.md).
+
+**Quản lý nhãn** có trang riêng `#label-management`, dùng chung API với workspace,
+có phân quyền, revision, giữ lịch sử và giữ bản nháp khi quay lại. Xem
+[hướng dẫn quản lý nhãn](docs/LABEL_MANAGEMENT_VI.md); chạy migration mới trước khi dùng bản cập nhật.
+
+Nhánh phát triển `feat/code-update-20261114` bổ sung luồng **Phối hợp hai mô hình** và
+**Kiểm tra theo ngân sách**: cặp Prediction có phiên bản, quyết định người dùng có audit,
+schema bất biến, retrieval phản hồi đã duyệt, train theo đợt và kích hoạt/rollback bằng validation.
+P0–P3 có grouping local–API mới; lịch sử A/B/C/D vẫn giữ nghĩa AI so với người lượt đầu.
+
+Sau cập nhật chạy migration và build frontend, rồi chạy native như cũ.
+Hướng dẫn lệnh và demo không cần API key: [docs/DEMO_SCRIPT_VI.md](docs/DEMO_SCRIPT_VI.md).
+Đối chiếu phần kế thừa/đóng góp: [docs/CONTRIBUTION_MATRIX.md](docs/CONTRIBUTION_MATRIX.md).
+Protocol và giới hạn: [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md),
+[docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
+Chưa có kết quả thực nghiệm người dùng/API thật mới; demo scripted không là số liệu nghiên cứu.
+
 Dataset ViHOS, mã train gốc và hồ sơ đối chiếu được bổ sung trong `datasets/`,
 `training/`. Xem [hướng dẫn tích hợp và minh chứng train](docs/HUONG_DAN_TICH_HOP_DATASET_VA_MINH_CHUNG_TRAIN.md).
 

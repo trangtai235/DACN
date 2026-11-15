@@ -1,0 +1,25 @@
+# Đối chiếu đóng góp M1–M3
+
+Mốc bắt đầu thực tế: `5e24ba55ad200bef45246f56f6f8d37d09ac9e8c`, nhánh `feat/code-update-20261114`.
+Mốc DACN trong đề bài `1b8fca19319556dc63236a98e229f86222d138ae` cũ hơn checkout:
+`git diff 1b8fca1 5e24ba5 -- backend frontend` cho thấy AutoLabelRun, hai job độc lập,
+UI tự gán và cấu hình provider đã được bổ sung TRƯỚC đợt này. Không nhận các phần đó là đóng góp mới.
+
+AnnotaHub đối chiếu tại commit [7fc2689](https://github.com/vdhong/AnnotaHub/tree/7fc2689e535f21604baf16f7d79a8b24d6882103).
+Đã tải mã nguồn công khai qua GitHub Contents API, kiểm tra các model, luồng annotation,
+AI review và Ollama. Bản tải đối chiếu nằm trong `backend/private_data/annotahub-reference/`,
+không đưa mã của công trình tham khảo vào Git. Chưa chạy ứng dụng AnnotaHub hoặc kiểm thử toàn bộ repo.
+Không truy cập được [toàn văn bài báo](https://www.sciencedirect.com/science/article/pii/S2352711026005637) (HTTP 403);
+không suy diễn thực nghiệm hoặc kết luận của bài báo.
+
+| AnnotaHub đã có | DACN trước sửa đã có | Đợt này bổ sung | Code và cách kiểm chứng |
+|---|---|---|---|
+| Gợi ý Ollama, chấp nhận/sửa thành annotation người; AI không được tính như một người đồng thuận. [ai_review.py:36,61](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/services/ai_review.py#L36), [tasks.py:598](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/tasks.py#L598). | Prediction, ai_label và hai job AutoLabelRun; chưa nối cặp với quyết định. `5e24ba5:studio/api/automatic.py:47,97`; workspace `annotations.py:49` lấy Prediction mới nhất. | Cặp tham chiếu chính xác hai Prediction theo run/text/context/schema; lỗi/thiếu/tương thích/cũ được tách; retry giữ kết quả thành công. | `backend/studio/models/collaboration.py:25`, `services/collaboration.py:20,32,76`; test `test_branch_order_retry_and_request_idempotency`, `test_api_failure_invalid_output_not_false_agreement`. |
+| Nhãn theo người, audit và phân xử; [annotation.py:169,285,466](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/services/annotation.py#L169). | Annotation, GoldAnnotation, AIExposure, revision; nghiên cứu mù nhị phân riêng. | Bất đồng: nhãn độc lập → mở gợi ý có timestamp/ID → xác nhận/sửa/chuyển phân xử; cần ngữ cảnh/không quyết định không thành lớp nội dung. Không tự tạo gold từ hai model. | `services/collaboration.py:139`, `api/collaboration.py`; tests blind/exposure/revision, cùng sai và net fixes. |
+| Nhãn dự án có override tên/định nghĩa; [models.py:369](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/models.py#L369). | ProjectLabel và prompt có bộ nhãn, chưa có schema bất biến; Transformer độc hại không tự thành bộ phân loại tùy ý. | Snapshot schema gồm key/tên/định nghĩa/loại trừ/hướng dẫn; mỗi thay đổi tạo phiên bản, giữ nghĩa lịch sử; compatibility explicit. | `models/collaboration.py:9`, `services/adaptation.py:24,42`; test stale text/context/schema và binary bị từ chối khi có SPAM. |
+| Prompt xây từ labels_info; [ollama_service.py:143](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/services/ollama_service.py#L143). Chưa xác minh retrieval phản hồi ở module ngoài phạm vi đã đọc. | API prompt có mô tả nhãn, chưa có truy xuất phản hồi duyệt. | TF-IDF/cosine, tie-break theo ID, tối đa 4 ví dụ/2.400 ký tự, lưu approval/decision/revision/hash; loại chính mẫu, trùng, test/reference/pilot, tranh chấp và phản hồi lỗi thời. | `services/adaptation.py:60,94`; test retrieval và prompt mode. Đây là few-shot retrieval, không fine-tune API. |
+| Chưa thấy model training lifecycle trong các module đã đọc; không khẳng định thiếu ở mọi phiên bản. | `experiments/training.py`: ba thuật toán sklearn, validation chọn siêu tham số, test báo cáo; ModelRun/artifact. | Duyệt phản hồi → dataset checksum/split theo nguồn/video và trùng chuẩn hóa → ứng viên → validation cùng incumbent → quản lý kích hoạt/rollback có audit. | `services/adaptation.py:127`, `core/jobs/feedback_train.py`, test source-grouped multiclass train/activation/rollback. Không tự train Transformer. |
+| Thống kê người giữ/sửa gợi ý ở [ai_review.py:111](https://github.com/vdhong/AnnotaHub/blob/7fc2689e535f21604baf16f7d79a8b24d6882103/comments/services/ai_review.py#L111); chưa xác minh policy ngân sách trong module khác. | P0–P3, A/B/C/D, net fixes và tham chiếu; thời gian từ claim đến submit. `5e24ba5:reviewing/services.py:7,20,52`. | Grouping local–API nhiều lớp riêng, snapshot cố định, seed/reason; P2 thăm dò đồng thuận; pause/resume/heartbeat, vượt budget; báo cáo toàn quần thể và replay lịch sử quan sát đủ. | `reviewing/paired.py:39,57,82,164,193`; `services/experiment_reports.py:9`; tests budget/replay/net fixes và migration. P3 vẫn là proxy đổi nhãn trên thời gian. |
+
+Phạm vi khẳng định: phần nhóm thiết kế/hiện thực và có thể đánh giá trên DACN so với
+các module tham khảo đã kiểm tra. Không tuyên bố phương pháp mới toàn lĩnh vực hoặc chất lượng tốt hơn khi chưa đo.

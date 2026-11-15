@@ -4,6 +4,9 @@ from core.models import Project, Job
 
 
 class AutoLabelRun(models.Model):
+    schema = models.ForeignKey('studio.LabelSchema', null=True, on_delete=models.RESTRICT)
+    request_key = models.CharField(max_length=80, null=True)
+    options = models.JSONField(default=dict)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='auto_label_runs')
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     labels = models.JSONField(default=list)
@@ -13,6 +16,9 @@ class AutoLabelRun(models.Model):
     local_job = models.ForeignKey(Job, null=True, on_delete=models.SET_NULL, related_name='+')
     llm_job = models.ForeignKey(Job, null=True, on_delete=models.SET_NULL, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['project', 'request_key'], name='unique_auto_request_key')]
 
 
 class AutoLabelResult(models.Model):

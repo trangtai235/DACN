@@ -23,6 +23,7 @@ class AnnotationEvent(models.Model):
     action=models.CharField(max_length=24)
     created_at=models.DateTimeField(auto_now_add=True)
 class GoldAnnotation(models.Model):
+    revision=models.PositiveIntegerField(default=1)
     comment=models.OneToOneField(Comment,on_delete=models.CASCADE,related_name='gold_annotation')
     label=models.ForeignKey(ProjectLabel,null=True,blank=True,on_delete=models.PROTECT)
     spans=models.JSONField(default=list)

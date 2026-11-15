@@ -11,6 +11,8 @@ class ProjectSettings(models.Model):
     active_model=models.ForeignKey('experiments.ModelRun',null=True,blank=True,on_delete=models.SET_NULL)
     active_connection=models.ForeignKey('integrations.ProviderConnection',null=True,blank=True,on_delete=models.SET_NULL)
 class ProjectLabel(models.Model):
+    revision=models.PositiveIntegerField(default=1)
+    exclusions=models.TextField(blank=True)
     project=models.ForeignKey(Project,on_delete=models.CASCADE,related_name='label_definitions')
     key=models.SlugField(max_length=64)
     name=models.CharField(max_length=120)
@@ -18,6 +20,14 @@ class ProjectLabel(models.Model):
     color=models.CharField(max_length=7,default='#4f78a5')
     enabled=models.BooleanField(default=True)
     order=models.PositiveSmallIntegerField(default=0)
+    def save(self,*args,**kwargs):
+        if self.pk and not self._state.adding:
+            previous=type(self).objects.get(pk=self.pk)
+            if previous.project_id!=self.project_id or previous.key!=self.key:
+                raise ValueError('Mã nhãn và dự án được giữ ổn định; tạo nhãn mới thay vì đổi mã.')
+            self.revision=previous.revision+1
+            if kwargs.get('update_fields') is not None:kwargs['update_fields']=set(kwargs['update_fields'])|{'revision'}
+        super().save(*args,**kwargs)
     class Meta:
         constraints=[models.UniqueConstraint(fields=['project','key'],name='studio_unique_project_label')]
         ordering=['order','id']

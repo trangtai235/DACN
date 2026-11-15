@@ -20,7 +20,7 @@ class BenchmarkRun(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
 class ReferenceLabel(models.Model):
     comment=models.OneToOneField(Comment,on_delete=models.CASCADE)
-    label=models.CharField(max_length=16,choices=LABELS)
+    label=models.CharField(max_length=64)
     provenance=models.CharField(max_length=240)
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT)
     created_at=models.DateTimeField(auto_now_add=True)

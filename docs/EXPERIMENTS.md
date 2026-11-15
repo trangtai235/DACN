@@ -1,5 +1,15 @@
 # Thiết kế đánh giá cho đồ án
 
+## Protocol mới và lịch sử
+
+Từ đợt M1–M3 xem [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md): so local-only,
+API chỉ mô tả nhãn, API retrieval, phối hợp có người quyết định; feedback batch train;
+grouping local–API nhiều lớp, pause/resume/heartbeat và replay lịch sử quan sát đủ.
+Các mục A/B/C/D và thời gian wall-clock bên dưới mô tả luồng **legacy_ai_human** trước sửa,
+không được đổi tên thành local–API hoặc áp dụng cho mọi schema. Những mục “cần bổ sung replay,
+pause/resume” bên dưới là ghi nhận lịch sử; luồng local_api mới đã có triển khai này nhưng chưa có human study.
+API báo cáo và giới hạn thật được ghi trong [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
+
 ## Bộ model hiện tại
 
 Ba model từ `vihos-models-full.zip`: **PhoBERT-base, XLM-R base, XLM-R large**.

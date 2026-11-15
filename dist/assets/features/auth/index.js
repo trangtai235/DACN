@@ -1,7 +1,7 @@
-import {authMarkup} from './view.js?v=f62135f1ecf7';
-import {state,DEMO,T} from '../../core/state.js?v=f62135f1ecf7';
-import {api} from '../../core/api.js?v=f62135f1ecf7';
-import {toast} from '../../core/ui.js?v=f62135f1ecf7';
+import {authMarkup} from './view.js?v=332cf58721ec';
+import {state,DEMO,T} from '../../core/state.js?v=332cf58721ec';
+import {api} from '../../core/api.js?v=332cf58721ec';
+import {toast} from '../../core/ui.js?v=332cf58721ec';
 export function render(view='login'){
  document.body.classList.add('is-auth');
  document.documentElement.lang=state.language;

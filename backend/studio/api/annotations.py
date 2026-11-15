@@ -12,7 +12,8 @@ def annotation_state(comment,user):
 @require_GET
 def comments(request):
     project=project_for(request,request.GET['project']);prefs=ensure(project);qs=project.comments.select_related('source').order_by('id')
-    if request.GET.get('source'):qs=qs.filter(source_id=request.GET['source'])
+    source=resolve_source(project,request.GET.get('source'))
+    if source:qs=qs.filter(source=source)
     if request.GET.get('q'):qs=qs.filter(text__icontains=request.GET['q'][:200])
     status=request.GET.get('status','all');my=Annotation.objects.filter(comment__project=project,user=request.user)
     if status=='todo':qs=qs.exclude(pk__in=my.values('comment_id')).filter(unusable=False)
@@ -32,7 +33,8 @@ def comments(request):
 @require_GET
 def workspace(request):
     project=project_for(request,request.GET['project']);prefs=ensure(project);qs=project.comments.filter(unusable=False).order_by('id')
-    if request.GET.get('source'):qs=qs.filter(source_id=request.GET['source'])
+    source=resolve_source(project,request.GET.get('source'))
+    if source:qs=qs.filter(source=source)
     if request.GET.get('comment'):qs=qs.filter(pk=request.GET['comment'])
     else:
         my=Annotation.objects.filter(comment__project=project,user=request.user).values('comment_id')
@@ -53,6 +55,8 @@ def workspace(request):
 @require_POST
 def submit(request,comment_id):
     c=get_object_or_404(Comment,pk=comment_id);project=project_for(request,c.project_id);prefs=writable(project);p=data(request)
+    source=resolve_source(project,p.get('source_id'))
+    if source and c.source_id!=source.pk:raise ValueError('Bình luận không thuộc video/nguồn đã chọn.')
     with transaction.atomic():
         mutation_guard(project,request.user)
         # One row lock serializes revisions and redundancy assignment for this comment.
@@ -104,11 +108,14 @@ def quality_view(request):
 def adjudicate(request,comment_id):
     c=get_object_or_404(Comment,pk=comment_id);project=project_for(request,c.project_id,True);writable(project);p=data(request)
     if in_blind(project,request.user):raise PermissionError('Hoàn tất lượt mù trước khi phân xử chung.')
+    if c.prediction_pairs.exists() and c.annotations.filter(user=request.user).exists():raise PermissionError('Người phân xử phải khác người đã gán mẫu phối hợp.')
     note=str(p.get('note','')).strip()
     if not note:raise ValueError('Cần lý do phân xử.')
     label=label_for(project,p.get('label'),nullable=True);spans=validate_spans(c.text,p.get('spans',[]),project)
     with transaction.atomic():
         mutation_guard(project,request.user,True)
         c=Comment.objects.select_for_update().get(pk=c.pk)
-        GoldAnnotation.objects.update_or_create(comment=c,defaults={'label':label,'spans':spans,'note':note[:4000],'adjudicator':request.user})
+        old=GoldAnnotation.objects.select_for_update().filter(comment=c).first()
+        if (old.revision if old else 0)!=int(p.get('gold_revision',0)):raise ValueError('Gold đã đổi; tải lại trước khi phân xử.')
+        GoldAnnotation.objects.update_or_create(comment=c,defaults={'label':label,'spans':spans,'note':note[:4000],'adjudicator':request.user,'revision':(old.revision if old else 0)+1})
     audit(project,request.user,'gold_adjudicated',comment=c.id);return JsonResponse({'ok':True})

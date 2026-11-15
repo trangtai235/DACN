@@ -1,19 +1,20 @@
-import {state,DEMO} from '../../core/state.js?v=f62135f1ecf7';
-import {api} from '../../core/api.js?v=f62135f1ecf7';
-import {refresh} from '../../core/events.js?v=f62135f1ecf7';
-import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=f62135f1ecf7';
+import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery} from '../../core/annotation-scope.js?v=332cf58721ec';
+import {state,DEMO} from '../../core/state.js?v=332cf58721ec';
+import {api} from '../../core/api.js?v=332cf58721ec';
+import {refresh,navigate} from '../../core/events.js?v=332cf58721ec';
+import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=332cf58721ec';
 
-let listing={runs:[],api_ready:false},detail=null,selected=null,projectId=null,page=1,onlyDifferent=false,query='';
+let listing={runs:[],api_ready:false},detail=null,selected=null,projectId=null,page=1,onlyDifferent=false,query='',scopeId='';
 const active=job=>job&&['queued','running'].includes(job.status);
 const duration=ms=>ms==null?'—':ms<1000?`${Math.round(ms)} ms`:ms<60000?`${(ms/1000).toFixed(1)} ${T('giây','sec')}`:`${Math.floor(ms/60000)} ${T('phút','min')} ${Math.round(ms%60000/1000)} ${T('giây','sec')}`;
 const status=job=>({queued:T('Đang chờ','Queued'),running:T('Đang chạy','Running'),complete:T('Hoàn tất','Complete'),failed:T('Có lỗi','Failed'),cancelled:T('Đã dừng','Stopped')})[job?.status]||'—';
 export async function load(){
  const id=state.workspace.project.id;
- if(projectId!==id){projectId=id;selected=null;page=1;onlyDifferent=false;query='';}
+ if(projectId!==id||scopeId!==annotationSourceId()){projectId=id;scopeId=annotationSourceId();selected=null;page=1;onlyDifferent=false;query='';}
  if(DEMO){listing={runs:[],api_ready:false};detail=null;return;}
- listing=await api('studio/auto-label/runs?project='+id);
+ listing=await api('studio/auto-label/runs?project='+id+sourceQuery());
  if(!listing.runs.some(r=>r.id===selected))selected=listing.runs[0]?.id||null;
- detail=selected?await api(`studio/auto-label/runs/${selected}?page=${page}&different=${onlyDifferent?1:0}&q=${encodeURIComponent(query)}`):null;
+ detail=selected?await api(`studio/auto-label/runs/${selected}?page=${page}&different=${onlyDifferent?1:0}&q=${encodeURIComponent(query)}${sourceQuery()}`):null;
 }
 export const hasActiveJobs=()=>Boolean(detail&&(active(detail.run.local)||active(detail.run.llm)));
 function label(result,labels){if(!result)return `<span class="auto-pending">${T('Chưa có kết quả','Pending')}</span>`;const item=labels.find(l=>l.key===result.label);return `<span class="auto-label" style="--label:${safeColor(item?.color)}">${esc(item?.name||result.label)}</span>`;}
@@ -37,12 +38,12 @@ function comparison(run){
 export function render(){
  const can=state.workspace.project.can_manage,run=detail?.run;
  const running=listing.runs.some(r=>active(r.local)||active(r.llm));
- const actions=btn(T('Làm mới','Refresh'),'annotation:reload','','refresh')+(can?btn(T('Bắt đầu gán nhãn','Start auto labelling'),'annotation:start','primary','play',running?'disabled':''):'');
- let html=heading(T('Gán nhãn tự động','Automatic labelling'),T('ML Local và LLM chạy độc lập trên cùng bình luận, cùng bộ nhãn.','ML Local and LLM run independently on the same comments and label schema.'),actions);
+ const actions=`<a class="btn" href="#human-review">${T('Người duyệt nhãn (HITL)','Human-in-the-loop')}</a>`+btn(T('Làm mới','Refresh'),'annotation:reload','','refresh')+(can?btn(T('Bắt đầu gán nhãn','Start auto labelling'),'annotation:start','primary','play',running?'disabled':''):'');
+ let html=sourceScopeBar('annotation')+heading(T('Gán nhãn tự động','Automatic labelling'),T('ML Local và LLM chạy độc lập trên cùng bình luận, cùng bộ nhãn.','ML Local and LLM run independently on the same comments and label schema.'),actions);
  if(DEMO)return html+panel(T('Chạy trên backend','Run with the backend'),T('Mở source Django để chạy model, gọi API và lưu kết quả thực tế.','Run the Django source to execute models, call the API and store real results.'));
  html+=`<div class="auto-mode-banner"><span class="auto-dot" style="background:${listing.api_ready?'#159a82':'#527eb5'}"></span><div><b>${listing.api_ready?T('Sẵn sàng chạy 2 luồng song song','Ready for two parallel branches'):T('Sẵn sàng chạy ML Local','Ready for ML Local')}</b><p>${listing.api_ready?esc(listing.connection)+' · '+T('LLM sẽ dùng đúng bộ nhãn và số bình luận của ML Local. Gọi API có thể phát sinh phí.','LLM uses the exact same labels and comments as ML Local. API calls may incur charges.'):T('Chưa có API key. ML Local vẫn có thể gán nhãn toàn bộ dữ liệu.','No API key configured. ML Local can still label the entire dataset.')}</p></div><a class="btn sm" href="#models">${T('Model & API','Models & API')}</a></div>`;
  if(!run)return html+`<div class="auto-empty panel"><h2>${T('Chưa có lượt gán nhãn','No runs yet')}</h2><p>${T('Nhập dữ liệu, chọn model rồi bắt đầu. Kết quả và biểu đồ sẽ xuất hiện tại đây.','Import data, choose a model and start. Results and charts will appear here.')}</p><a href="#datasets" class="btn">${T('Đến dữ liệu','Open data')}</a></div>`;
- html+=`<div class="auto-run-picker"><label for="auto-run">${T('Lượt chạy','Run')}</label><select id="auto-run">${listing.runs.map(r=>`<option value="${r.id}" ${r.id===run.id?'selected':''}>#${r.id} · ${date(r.created_at)} · ${r.count} ${T('bình luận','comments')} · ${r.llm?'ML + LLM':'ML Local'}</option>`).join('')}</select><a class="btn sm" href="/api/studio/auto-label/runs/${run.id}?download=csv">${T('Tải kết quả CSV','Download CSV')}</a></div>`;
+ html+=`<div class="auto-run-picker"><label for="auto-run">${T('Lượt chạy','Run')}</label><select id="auto-run">${listing.runs.map(r=>`<option value="${r.id}" ${r.id===run.id?'selected':''}>#${r.id} · ${date(r.created_at)} · ${r.count} ${T('bình luận','comments')} · ${r.llm?'ML + LLM':'ML Local'}</option>`).join('')}</select><a class="btn sm" href="/api/studio/auto-label/runs/${run.id}?download=csv${sourceQuery()}">${T('Tải kết quả CSV','Download CSV')}</a></div>`;
  html+=`<div class="auto-branches ${run.llm?'paired':''}">${branchCard(run,'local')}${branchCard(run,'llm')}</div>`+comparison(run);
  html+=`<p class="auto-timing-note">${T('Thời gian tính riêng từng luồng, gồm chuẩn bị model/API và lưu kết quả; không cộng thời gian chờ hàng đợi hoặc thời gian dừng. Biểu đồ tính trên kết quả đã gán của mỗi luồng. Nhãn khác nhau là khác nhãn câu, không phải kết luận đúng/sai.','Each branch is timed independently, including preparation and result storage; queue and paused time are excluded. Charts use completed results per branch. Disagreement means different sentence labels, not correctness.')}</p>`;
  const pages=Math.max(1,Math.ceil(detail.total/30));
@@ -54,17 +55,24 @@ export async function action(name,el){
  if(DEMO){nativeRequired();return;}
  if(name==='start'){
   const source=sessionStorage.getItem('annotaflow.annotationSource.'+state.workspace.project.id)||'';
-  modal(T('Bắt đầu gán nhãn tự động','Start automatic labelling'),`<form data-submit="annotation:start">${select('model_id',T('ML Local','ML Local'),state.workspace.models.map(m=>[m.id,m.name]),state.workspace.preferences.active_model_id)}${select('source_id',T('Dữ liệu cần gán','Data scope'),[['',T('Tất cả nguồn','All sources')],...state.workspace.sources.map(s=>[s.id,s.name+' · '+s.count])],source)}<div class="info-banner">${listing.api_ready?T('Chạy ML Local và LLM song song trên cùng dữ liệu. Luồng LLM sẽ gọi API thật và có thể phát sinh phí.','Run ML Local and LLM in parallel on the same data. LLM sends real API requests and may incur charges.'):T('Chưa có API key: chỉ chạy ML Local.','No API key: run ML Local only.')}</div><p class="form-hint">${T('Mỗi lượt lưu riêng kết quả và bộ nhãn tại thời điểm bắt đầu.','Each run saves its own results and the label schema at launch.')}</p>${formEnd(T('Chạy gán nhãn','Run labelling'))}</form>`);return;
+  modal(T('Bắt đầu gán nhãn tự động','Start automatic labelling'),`<form data-submit="annotation:start">${select('model_id',T('ML Local','ML Local'),state.workspace.models.map(m=>[m.id,m.name]),state.workspace.preferences.active_model_id)}${select('source_id',T('Dữ liệu cần gán','Data scope'),[['',T('Tất cả nguồn','All sources')],...state.workspace.sources.map(s=>[s.id,s.name+' · '+s.count])],source)}<div class="info-banner">${listing.api_ready?T('Chạy ML Local và LLM song song trên cùng dữ liệu. Luồng LLM sẽ gọi API thật và có thể phát sinh phí.','Run ML Local and LLM in parallel on the same data. LLM sends real API requests and may incur charges.'):T('Chưa có API key: chỉ chạy ML Local.','No API key: run ML Local only.')}</div><p class="form-hint">${T('Mỗi lượt lưu riêng kết quả và bộ nhãn tại thời điểm bắt đầu.','Each run saves its own results and the label schema at launch.')}</p><label class="check-row"><input type="checkbox" name="human_loop" checked> Human-in-the-loop: chuyển kết quả sang hàng đợi người duyệt</label><p>Model chỉ gợi ý. Người dùng xác nhận hoặc sửa nhãn trước khi dùng làm phản hồi.</p>${formEnd(T('Chạy gán nhãn','Run labelling'))}</form>`);return;
  }
  if(name==='page'){page=Number(el.dataset.page);await refresh();return;}
- if(name==='control'){await api(`studio/auto-label/runs/${selected}/control`,{branch:el.dataset.branch,action:el.dataset.mode});await refresh();}
+ if(name==='control'){await api(`studio/auto-label/runs/${selected}/control`,{branch:el.dataset.branch,action:el.dataset.mode,source_id:scopeId||null});await refresh();}
 }
 export async function submit(name,form){
  if(name==='filter'){query=form.q.value;onlyDifferent=Boolean(form.different?.checked);page=1;await refresh();return;}
  if(name==='start'){
-  const values=Object.fromEntries(new FormData(form));const result=await api('studio/auto-label/start',{...values,project:state.workspace.project.id});
-  selected=result.id;page=1;onlyDifferent=false;query='';sessionStorage.removeItem('annotaflow.annotationSource.'+state.workspace.project.id);closeModal();await refresh();toast(T('Đã bắt đầu gán nhãn tự động.','Automatic labelling started.'));
+  const values=Object.fromEntries(new FormData(form));
+  if(form.human_loop?.checked){
+   const project=state.workspace.project.id;
+   const result=await api('studio/collaboration/start',{...values,project,connection_id:listing.connection_id||null,request_key:crypto.randomUUID()});
+   sessionStorage.setItem('annotaflow.humanRun',JSON.stringify({project,id:result.id}));
+   selectAnnotationSource(values.source_id||'');closeModal();navigate('human-review');return;
+  }
+  const result=await api('studio/auto-label/start',{...values,project:state.workspace.project.id});
+  selected=result.id;page=1;onlyDifferent=false;query='';selectAnnotationSource(values.source_id||'');closeModal();await refresh();toast(T('Đã bắt đầu gán nhãn tự động.','Automatic labelling started.'));
  }
 }
-export async function change(event){if(event.target.id==='auto-run'){selected=Number(event.target.value);page=1;onlyDifferent=false;await refresh();}}
+export async function change(event){if(event.target.id==='annotation-source-scope'){if(state.busy){event.target.value=annotationSourceId();return;}state.busy=true;try{selectAnnotationSource(event.target.value);await refresh();}finally{state.busy=false;}return;}if(event.target.id==='auto-run'){selected=Number(event.target.value);page=1;onlyDifferent=false;await refresh();}}
 export function keyboard(){}

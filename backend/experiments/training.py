@@ -35,7 +35,7 @@ def metrics(y,p,label_keys=None):
             'confusion_matrix':confusion_matrix(y,p,labels=classes).tolist(),
             'per_class':classification_report(y,p,labels=classes,target_names=label_keys,output_dict=True,zero_division=0),'n':len(y)}
 
-def train(train_path,valid_path,test_path,output_dir,progress=None,dataset_name='CSV do nhóm cung cấp',algorithm_key='logistic_regression',label_keys=None):
+def train(train_path,valid_path,test_path,output_dir,progress=None,dataset_name='CSV do nhóm cung cấp',algorithm_key='logistic_regression',label_keys=None,seed=42):
     from experiments.algorithms.registry import algorithm
     spec=algorithm(algorithm_key);label_keys=label_keys or ['NON_TOXIC','TOXIC']
     out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
@@ -54,17 +54,19 @@ def train(train_path,valid_path,test_path,output_dir,progress=None,dataset_name=
     start=time.perf_counter();trials=[];best=None
     for i,c in enumerate(spec['values']):
         if progress:progress(15+i*20,f"Huấn luyện {spec['parameter']}={c}")
-        model=Pipeline([('tfidf',TfidfVectorizer(analyzer='char',ngram_range=(3,5),min_df=2,max_features=60000,sublinear_tf=True)),('classifier',spec['factory'](c))])
+        classifier=spec['factory'](c)
+        if 'random_state' in classifier.get_params():classifier.set_params(random_state=seed)
+        model=Pipeline([('tfidf',TfidfVectorizer(analyzer='char',ngram_range=(3,5),min_df=2,max_features=60000,sublinear_tf=True)),('classifier',classifier)])
         model.fit(x['train'],y['train'])
         m=metrics(y['validation'],model.predict(x['validation']),label_keys);trials.append({spec['parameter']:c,'validation_macro_f1':m['macro_f1']})
         if best is None or m['macro_f1']>best[0]:best=(m['macro_f1'],model,c)
     elapsed=time.perf_counter()-start
     model=best[1];t=time.perf_counter();pred=model.predict(x['test']);latency=(time.perf_counter()-t)/len(pred)*1000
     majority=max(set(y['train']),key=y['train'].count)
-    report={'name':spec['name'],'algorithm':algorithm_key,'label_keys':label_keys,'selected_parameter':{spec['parameter']:best[2]},'dataset':dataset_name,'seed':42,'selected_C':best[2] if spec['parameter']=='C' else None,
+    report={'name':spec['name'],'algorithm':algorithm_key,'label_keys':label_keys,'selected_parameter':{spec['parameter']:best[2]},'dataset':dataset_name,'seed':seed,'selected_C':best[2] if spec['parameter']=='C' else None,
             'raw_counts':{k:len(v) for k,v in raw.items()},'counts':{k:len(v) for k,v in clean.items()},'removed_duplicates_or_overlaps':removed,
             'selection':'Chọn siêu tham số bằng validation Macro-F1; test chỉ chấm cấu hình đã chọn, không fit thêm validation.',
-            'trials':trials,'test':metrics(y['test'],pred,label_keys),'majority_baseline':metrics(y['test'],[majority]*len(y['test']),label_keys),'train_seconds':elapsed,'mean_prediction_ms':latency,
+            'trials':trials,'validation':metrics(y['validation'],model.predict(x['validation']),label_keys),'test':metrics(y['test'],pred,label_keys),'majority_baseline':metrics(y['test'],[majority]*len(y['test']),label_keys),'train_seconds':elapsed,'mean_prediction_ms':latency,
             'source':'https://github.com/tarudesu/ViCTSD' if dataset_name=='UIT-ViCTSD' else 'CSV do người dùng cung cấp','source_files_sha256':{k:hashlib.sha256(Path(v).read_bytes()).hexdigest() for k,v in [('train',train_path),('validation',valid_path),('test',test_path)]},
             'scope':'Kết quả chỉ áp dụng trên tập test đã cung cấp; chưa chứng minh tổng quát hóa sang nguồn khác.'}
     joblib.dump(model,out/'classifier.joblib',compress=3)

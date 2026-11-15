@@ -1,4 +1,4 @@
-import csv,hashlib,io,json,re,uuid
+import csv,hashlib,io,json,re,uuid,logging
 from functools import wraps
 from pathlib import Path
 from django.conf import settings
@@ -18,6 +18,8 @@ from experiments.training import metrics
 from reviewing.models import ReviewRun,ReviewTask
 from reviewing import services as review
 
+logger=logging.getLogger(__name__)
+
 
 def data(request):
     if request.content_type=='application/json':
@@ -36,6 +38,10 @@ def api(fn):
         try:return fn(request,*a,**kw)
         except PermissionError as e:return JsonResponse({'error':str(e)},status=403)
         except (ValueError,KeyError,TypeError) as e:return JsonResponse({'error':str(e)},status=400)
+        except Http404:return JsonResponse({'error':'Không tìm thấy dữ liệu yêu cầu.'},status=404)
+        except Exception:
+            logger.exception('API request failed: %s %s',request.method,request.path)
+            return JsonResponse({'error':'Máy chủ gặp lỗi khi xử lý yêu cầu. Vui lòng thử lại hoặc kiểm tra log backend.','code':'internal_error'},status=500)
     return wrapped
 
 
@@ -54,11 +60,14 @@ def project_for(request,pid,manage=False):
 def manager(project,user):return project.owner_id==user.id or Membership.objects.filter(project=project,user=user,role='manager').exists()
 
 
-def in_blind(project,user):return ReviewTask.objects.filter(run__project=project,reviewer=user,state='claimed').exists()
+def in_blind(project,user):
+    from studio.models import PairDecision
+    return (ReviewTask.objects.filter(run__project=project,reviewer=user,state='claimed').exists() or
+            PairDecision.objects.filter(pair__run__project=project,user=user,status__in=['blind','preliminary'],exposed_at__isnull=True).exists())
 
 
 def serialize_comment(row,hide=False):
-    result={'id':row.id,'text':row.text,'source':row.source.name,'context':row.context,'revision':row.revision,'created_at':row.created_at.isoformat()}
+    result={'id':row.id,'text':row.text,'source':row.source.name,'source_id':row.source_id,'context':row.context,'revision':row.revision,'created_at':row.created_at.isoformat()}
     if not hide:result.update({'ai_label':row.ai_label,'ai_provider':row.ai_provider,'first_label':row.first_label,'group':row.origin_group,'first_actor':row.first_actor_id})
     return result
 
@@ -69,10 +78,17 @@ def report_model(m):return {'algorithm':m.algorithm,'id':m.id,'name':m.name,'sta
 def report_job(j):return {'id':j.id,'kind':j.kind,'status':j.status,'progress':j.progress,'message':j.message,'result':json.loads(j.result),'cancel_requested':j.cancel_requested,'updated_at':j.updated_at.isoformat()}
 
 
-def run_json(run):return {'id':run.id,'policy':run.policy,'budget_seconds':run.budget_seconds,'used_seconds':run.used_seconds,'state':run.state,'stats':review.group_stats(run),'completed':run.tasks.filter(state='complete').count(),'conflicts':run.tasks.filter(state='conflict').count()}
+def run_json(run):return {'id':run.id,'grouping_strategy':run.grouping_strategy,'policy':run.policy,'budget_seconds':run.budget_seconds,'used_seconds':run.used_seconds,'state':run.state,'stats':review.group_stats(run),'completed':run.tasks.filter(state='complete').count(),'conflicts':run.tasks.filter(state='conflict').count()}
 
 
 def task_json(t,blind=True):
+    if t.run.grouping_strategy=='local_api':
+        from reviewing.paired import population
+        row=population(t.run)[t.comment_id]
+        result={'id':t.id,'run_id':t.run_id,'comment_id':t.comment_id,'text':row['text'],'context':row['context'],'state':t.state,
+                'clock':t.clock,'labels':[l for l in t.run.input_snapshot['schema']['labels'] if l['enabled']]}
+        if not blind:result.update(first_label=row['first_label'],blind_label=t.blind_label,note=t.note,reason=t.reason)
+        return result
     result={'id':t.id,'run_id':t.run_id,'comment_id':t.comment_id,'text':t.comment.text,'context':t.comment.context,'state':t.state,'started_at':t.created_at.isoformat()}
     if not blind:result.update({'first_label':t.comment.first_label,'blind_label':t.blind_label,'first_note':t.comment.first_note,'note':t.note,'reason':t.reason})
     return result

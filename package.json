@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check dist/assets/app.js && node --check dist/assets/core/demo.js && node --check dist/assets/features/models/index.js && node --check dist/assets/features/evaluation/index.js",
+    "check": "node scripts/check_frontend.mjs",
     "test:exports": "node scripts/check_exports.mjs"
   }
 }

@@ -25,6 +25,14 @@ def first_pass(request,comment_id):
 def create_run(request):
     p=data(request);project=project_for(request,p['project'],True);policy=p.get('policy','adaptive');minutes=int(p.get('minutes',30))
     if policy not in ('random','fixed','fixed_explore','adaptive') or not 1<=minutes<=600:raise ValueError('Cấu hình phiên chưa hợp lệ.')
+    if not 0<=int(p.get('seed',42))<=4294967295:raise ValueError('Seed từ 0 đến 4294967295.')
+    if p.get('grouping_strategy')=='local_api':
+        from studio.models import AutoLabelRun
+        from reviewing.paired import create
+        batch=get_object_or_404(AutoLabelRun,project=project,pk=p['batch_id'],schema__isnull=False)
+        obj=create(batch,policy,minutes*60,int(p.get('seed',42)),request.user)
+        return JsonResponse({'run':run_json(obj)})
+    if p.get('grouping_strategy','legacy_ai_human')!='legacy_ai_human':raise ValueError('grouping_strategy không hợp lệ.')
     ids=list(Comment.objects.filter(project=project,first_frozen_at__isnull=False).order_by('id').values_list('id',flat=True))
     if not ids:raise ValueError('Cần có bình luận đã hoàn tất lượt đầu.')
     obj=ReviewRun.objects.create(project=project,policy=policy,budget_seconds=minutes*60,seed=int(p.get('seed',42)),population=json.dumps(ids))
@@ -34,7 +42,11 @@ def create_run(request):
 @api
 @require_POST
 def claim_review(request,run_id):
-    run=get_object_or_404(ReviewRun,pk=run_id);project_for(request,run.project_id);t=review.claim(run.id,request.user);return JsonResponse({'task':task_json(t)})
+    run=get_object_or_404(ReviewRun,pk=run_id);project_for(request,run.project_id)
+    from studio.models import PairDecision
+    if PairDecision.objects.filter(pair__run__project=run.project,user=request.user,status__in=['blind','preliminary'],exposed_at__isnull=True).exists():
+        raise PermissionError('Hoàn tất quyết định độc lập đang mở trước khi nhận lượt mù khác.')
+    t=review.claim(run.id,request.user);return JsonResponse({'task':task_json(t)})
 
 
 @api
@@ -48,6 +60,7 @@ def submit_review(request,task_id):
 @require_POST
 def adjudication(request,task_id):
     t=get_object_or_404(ReviewTask,pk=task_id);project_for(request,t.run.project_id);p=data(request)
+    if in_blind(t.run.project,request.user):raise PermissionError('Hoàn tất lượt mù trước khi phân xử mẫu khác.')
     if p.get('action')=='open':t=review.start_adjudication(t.id,request.user);return JsonResponse({'task':task_json(t,False)})
     t=review.adjudicate(t.id,request.user,p.get('label'),str(p.get('note','')));return JsonResponse({'state':t.state})
 
