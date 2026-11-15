@@ -1,11 +1,11 @@
-import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery,scopeDraftKind} from '../../core/annotation-scope.js?v=7d9a7701690b';
-import {state,DEMO} from '../../core/state.js?v=7d9a7701690b';
-import {api,projectQuery,exportFile} from '../../core/api.js?v=7d9a7701690b';
-import {refresh,navigate} from '../../core/events.js?v=7d9a7701690b';
-import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=7d9a7701690b';
-import {esc,heading,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=7d9a7701690b';
-import {workspace,suggestion,translationView} from './workspace.js?v=7d9a7701690b';
-import {administration} from './administration.js?v=7d9a7701690b';
+import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery,scopeDraftKind} from '../../core/annotation-scope.js?v=5b47e3c89a10';
+import {state,DEMO} from '../../core/state.js?v=5b47e3c89a10';
+import {api,projectQuery,exportFile} from '../../core/api.js?v=5b47e3c89a10';
+import {refresh,navigate} from '../../core/events.js?v=5b47e3c89a10';
+import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=5b47e3c89a10';
+import {esc,heading,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js?v=5b47e3c89a10';
+import {workspace,suggestion,translationView} from './workspace.js?v=5b47e3c89a10';
+import {administration} from './administration.js?v=5b47e3c89a10';
 
 let data={},rows=[],runId='',current=null,inspection=null,projectId=null,queueFilter='all',scopeId='';
 let labelCatalog={labels:[]},pairDraft=null,restorePairId=null,requestSequence=0,predictionRefreshing=false;

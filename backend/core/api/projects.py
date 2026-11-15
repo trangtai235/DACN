@@ -1,4 +1,33 @@
 from .common import *
+from django.db.models import Count,Q
+
+
+def compact_bootstrap(request,projects,project):
+    from studio.api.common import studio_bootstrap
+    from studio.models import ProjectSettings
+    is_manager=manager(project,request.user);blind=in_blind(project,request.user)
+    extra=studio_bootstrap(project,request.user,compact=True)
+    stats=project.comments.aggregate(total=Count('id'),predicted=Count('id',filter=Q(ai_label__isnull=False)),
+        first_pass=Count('id',filter=Q(first_frozen_at__isnull=False)),toxic=Count('id',filter=Q(first_label='TOXIC')))
+    archived=dict(ProjectSettings.objects.filter(project__in=projects).values_list('project_id','archived'))
+    # No comment contents, model reports, version snapshots, or exposure writes on navigation.
+    return JsonResponse({**extra,'bootstrap_mode':'compact',
+        'projects':[{'id':p.id,'name':p.name,'description':p.description,'is_demo':p.is_demo,'owner':p.owner_id,'can_delete':p.owner_id==request.user.id,'archived':archived.get(p.id,False)} for p in projects],
+        'project':{'id':project.id,'name':project.name,'description':project.description,'is_demo':project.is_demo,'can_manage':is_manager,'owner':project.owner_id},
+        'stats':stats,'comments':[],'models':[] if blind else list(project.model_runs.filter(state='ready').order_by('-id').values('id','name','algorithm','state','created_at')[:50]),
+        'benchmarks':[],'runs':[],'conflicts':[],'events':[],'jobs':[],
+        'members':[{'id':m.user_id,'name':m.user.first_name or m.user.username,'username':m.user.username,'role':m.role} for m in project.memberships.select_related('user')],
+        'api_configured':bool(settings.GEMINI_API_KEY),'youtube_configured':bool(settings.YOUTUBE_API_KEY),'gemini_model':settings.GEMINI_MODEL,
+        'user':{'id':request.user.id,'username':request.user.username,'name':request.user.first_name or request.user.username}})
+
+
+@api
+@require_GET
+def model_reports(request):
+    project=project_for(request,request.GET['project'])
+    if in_blind(project,request.user):return JsonResponse({'models':[],'benchmarks':[]})
+    return JsonResponse({'models':[report_model(m) for m in project.model_runs.filter(state='ready').order_by('-id')[:50]],
+        'benchmarks':[{'id':b.id,'report':json.loads(b.report)} for b in project.benchmark_runs.order_by('-id')[:5]] if manager(project,request.user) else []})
 
 @api
 @require_GET
@@ -7,7 +36,9 @@ def bootstrap(request):
     if not projects:
         if request.GET.get('project'):raise Http404()
         return JsonResponse({'projects':[],'project':None,'user':{'id':request.user.id,'username':request.user.username,'name':request.user.first_name or request.user.username}})
-    pid=request.GET.get('project') or projects[0].id;project=project_for(request,pid);is_manager=manager(project,request.user);blind=in_blind(project,request.user)
+    pid=request.GET.get('project') or projects[0].id;project=project_for(request,pid)
+    if request.GET.get('compact')=='1':return compact_bootstrap(request,projects,project)
+    is_manager=manager(project,request.user);blind=in_blind(project,request.user)
     from studio.api.common import studio_bootstrap
     extra=studio_bootstrap(project,request.user)
     from studio.services.projects import ensure as studio_ensure

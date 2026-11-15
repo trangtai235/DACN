@@ -7,7 +7,7 @@ const sessions=JSON.parse(process.env.ANNOTAFLOW_BROWSER_SESSIONS),fixture=JSON.
 const browser=await chromium.launch({headless:true,...(process.env.ANNOTAFLOW_BROWSER_EXECUTABLE?{executablePath:process.env.ANNOTAFLOW_BROWSER_EXECUTABLE}:{})});
 const folder=path.resolve('backend/private_data/verification');fs.mkdirSync(folder,{recursive:true});
 const pageErrors=[],pages=[];
-const idle=page=>page.waitForFunction(()=>window.__labelState?.busy===false);
+const idle=page=>page.waitForFunction(()=>window.__labelState?.busy===false&&!window.__labelState.loading);
 async function attach(page){await page.waitForSelector('nav');await page.evaluate(async()=>{window.__labelState=(await import('/assets/core/state.js'+new URL(document.querySelector('script[type=module]').src).search)).state;});await idle(page);}
 async function pageFor(role,route){const context=await browser.newContext({viewport:{width:1366,height:900}});await context.addCookies([{name:'sessionid',value:sessions[role],url:base}]);const page=await context.newPage();page.on('pageerror',e=>pageErrors.push(e.message));pages.push(page);await page.goto(base+'/#'+route);await attach(page);return page;}
 async function reload(page){await page.reload();await attach(page);}

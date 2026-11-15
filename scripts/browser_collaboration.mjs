@@ -9,7 +9,7 @@ const browser=await chromium.launch({headless:true,...(process.env.ANNOTAFLOW_BR
 const errors=[];
 const requests=[];
 const folder=path.resolve('backend/private_data/verification');fs.mkdirSync(folder,{recursive:true});
-async function idle(page){await page.waitForFunction(()=>window.__smokeState?.busy===false);}
+async function idle(page){await page.waitForFunction(()=>window.__smokeState?.busy===false&&!window.__smokeState.loading);}
 async function pageFor(role,route){
  const context=await browser.newContext({viewport:{width:1365,height:950}});
  await context.addCookies([{name:'sessionid',value:sessions[role],url:base}]);

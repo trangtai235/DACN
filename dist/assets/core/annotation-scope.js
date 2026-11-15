@@ -1,5 +1,5 @@
-import {state} from './state.js?v=7d9a7701690b';
-import {esc} from './ui.js?v=7d9a7701690b';
+import {state} from './state.js?v=5b47e3c89a10';
+import {esc} from './ui.js?v=5b47e3c89a10';
 
 const storageKey=()=>`annotaflow.annotationSource.${state.workspace.project.id}`;
 export const annotationSourceId=()=>sessionStorage.getItem(storageKey())||'';

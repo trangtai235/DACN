@@ -1,5 +1,33 @@
 # Xác minh AnnotaFlow Studio 3
 
+## Khởi động nhẹ, font local và điều hướng — 15/11/2026
+
+**161 tests, OK**, 60,235 giây, gồm các luồng browser và vòng đời Chrome trên Windows.
+**70 module source/build**, **16 converter** qua; không có migration mới.
+[Log hồi quy](../backend/private_data/verification/django-startup-full.log),
+[kết quả browser khởi động](../backend/private_data/verification/startup-browser.json).
+
+Gói compact không tải bình luận, báo cáo model đầy đủ hoặc snapshot phiên bản; không ghi
+exposure cho nội dung chưa hiển thị. API đầy đủ cũ giữ nguyên. Thống kê/nguồn lấy theo lô:
+fixture **1 nguồn và 51 nguồn đều 18 truy vấn**. Báo cáo model tải ở màn Đánh giá với quyền
+và giới hạn review mù như trước. Browser kiểm tra import theo trang, native không tải module
+demo, tái sử dụng metadata khi đổi trang, shell hiện trong lúc chờ và chọn trang cuối khi
+đổi nhanh. Mô phỏng bootstrap 503 rồi thử lại thành công; static demo vẫn hoạt động.
+
+Font Be Vietnam Pro được lưu trong public/fonts với giấy phép OFL và manifest SHA-256.
+Browser test chặn mạng ngoài vẫn mở được ứng dụng; ghi nhận **0 request ngoài origin**,
+**10 module JS ban đầu**, một lần bootstrap. Đây là fixture cách ly, không suy ra thời
+gian khởi động đầy đủ trên máy người dùng từ số đo của fixture.
+
+Đo API trên dự án DEMO 2/PostgreSQL bằng Django Client: gói đầy đủ **244.310 byte**, gói
+compact **3.481 byte**. So sánh cùng tiến trình đã warm, đảo thứ tự và lấy median 3 lượt
+mỗi loại: đầy đủ 57,61 ms/24 truy vấn, compact 22,69 ms/17 truy vấn. Bao gồm thời gian xử lý
+API nội bộ, không gồm mở BAT, HTTP browser, render hoặc suy luận model. Tất cả ghi tạm
+phục vụ xác minh được rollback; không gọi provider hoặc chạy lại model.
+[Số đo](../backend/private_data/verification/startup-comparison.json).
+
+Chi tiết hoạt động và cách nạp bản mới: [STARTUP_PERFORMANCE_VI.md](STARTUP_PERFORMANCE_VI.md).
+
 ## Dịch bình luận, hiện bất đồng và giảm độ trễ gợi ý — 15/11/2026
 
 **156 tests, OK**, 67,718 giây; gồm ba luồng browser, dịch HTTP mock cho ba giao thức,

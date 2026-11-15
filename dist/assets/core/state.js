@@ -1,4 +1,4 @@
-export const state={workspace:null,route:'overview',data:null,language:localStorage.getItem('annotaflow.language')==='en'?'en':'vi',busy:false};
+export const state={workspace:null,route:'overview',data:null,language:localStorage.getItem('annotaflow.language')==='en'?'en':'vi',busy:false,loading:false};
 export const DEMO=document.body.dataset.mode!=='api';
 export const T=(vi,en)=>state.language==='en'?(en||vi):vi;
 export const setWorkspace=value=>state.workspace=value;

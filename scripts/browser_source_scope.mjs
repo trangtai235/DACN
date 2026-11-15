@@ -13,7 +13,7 @@ page.on('response',r=>{if(r.url().includes('/api/')&&r.status()>=400)errors.push
 page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/decision'))writes.push(r.postDataJSON());});
 page.on('request',r=>{if(r.method()==='POST'&&/\/runs\/\d+\/resume$/.test(r.url()))resumes.push(r.postDataJSON());});
 const folder=path.resolve('backend/private_data/verification');fs.mkdirSync(folder,{recursive:true});
-const idle=()=>page.waitForFunction(()=>window.__sourceState?.busy===false);
+const idle=()=>page.waitForFunction(()=>window.__sourceState?.busy===false&&!window.__sourceState.loading);
 async function attach(){await page.waitForSelector('h1');await page.waitForLoadState('networkidle');await page.evaluate(async()=>{window.__sourceState=(await import('/assets/core/state.js'+new URL(document.querySelector('script[type=module]').src).search)).state;});await idle();}
 async function go(route){await idle();await page.locator(`#sidebar a[href="#${route}"]`).click();await page.waitForFunction(route=>window.__sourceState.route===route&&document.querySelector(`#sidebar a[href="#${route}"]`)?.classList.contains('active'),route);await page.waitForLoadState('networkidle');await idle();}
 async function annotate(index){await go('datasets');await page.locator(`[data-action="datasets:annotateSource"][data-id="${fixture.sources[index]}"]`).click();await page.waitForURL('**/#human-review');await page.waitForLoadState('networkidle');await idle();assert.equal(await page.locator('#annotation-source-scope').inputValue(),String(fixture.sources[index]));}

@@ -8,7 +8,7 @@ for(const file of [...walk('frontend/src'),...walk('dist/assets')].filter(f=>f.e
  if(result.error)throw result.error;
  if(result.status!==0){process.stderr.write(result.stderr||'Syntax check failed: '+file);process.exit(1);}
  const source=fs.readFileSync(file,'utf8');
- for(const match of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+)['"]/g)){
+ for(const match of source.matchAll(/(?:from\s*|import\s*(?:\(\s*)?)['"](\.[^'"]+)['"]/g)){
   const target=path.resolve(path.dirname(file),match[1].split('?')[0]);
   if(!fs.existsSync(target))throw new Error(`Missing module: ${file} -> ${match[1]}`);
  }
