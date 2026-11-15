@@ -4,7 +4,7 @@
 
 - Python **3.12, Windows installer 64-bit**: https://www.python.org/downloads/windows/ . Bật Python Launcher khi cài. Kiểm tra bằng `py -3.12 --version`.
 - PostgreSQL **18** (hoặc 15–17): https://www.postgresql.org/download/windows/ . Chọn PostgreSQL Server và Command Line Tools khi cài. Giữ service hoạt động, thường port 5432. Nhớ mật khẩu quản trị `postgres`. Có thể bỏ qua Stack Builder.
-- Microsoft Edge hoặc Google Chrome để mở cửa sổ app. Script tự tìm bản đã cài trên Windows.
+- Google Chrome để mở cửa sổ app. Script ưu tiên Chrome đã cài trên Windows, dùng Edge khi không tìm thấy Chrome.
 - Giải nén source thành `C:\AnnotaFlow`. Cần Internet lần đầu để tải package Python. Không cần GPU, Node.js, Docker, WSL hoặc Redis.
 
 ## 2. Chạy

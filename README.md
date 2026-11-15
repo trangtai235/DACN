@@ -39,7 +39,7 @@ Website đồ án chuyên ngành cho nhóm 3 người, viết mới bằng **Dja
 3. Nhấp đúp `RUN_NATIVE_WINDOWS.bat`. Lần đầu script hỏi kết nối PostgreSQL, tạo role ứng dụng riêng, database, migrations và dữ liệu demo.
 4. Cửa sổ web AnnotaFlow tự mở khi backend sẵn sàng. Dùng `tv1`, `tv2`, `tv3` với mật khẩu demo script in trên máy bạn. Lần sau xem `DEMO_PASSWORD` trong `.env.local` nếu cần.
 
-Web native dùng duy nhất cổng 8000 cho cả giao diện và API, mở bằng Edge/Chrome trong cửa sổ app riêng.
+Web native dùng duy nhất cổng 8000 cho cả giao diện và API, ưu tiên mở bằng **Google Chrome** trong cửa sổ app riêng; dùng Edge khi máy chưa cài Chrome.
 **Đóng cửa sổ web AnnotaFlow sẽ tự dừng backend và các tiến trình con, giải phóng cổng 8000.**
 Reload/chuyển trang vẫn giữ app chạy. Ctrl+C hoặc đóng terminal BAT cũng dừng app.
 Phiên đăng nhập của cửa sổ này được giữ trong `backend/private_data/native-browser/`; các cửa sổ trình duyệt thông thường không bị đóng. PostgreSQL chạy riêng để lưu dữ liệu.

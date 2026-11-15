@@ -21,6 +21,15 @@ import native_web
 
 
 class NativeWebTests(SimpleTestCase):
+    def test_default_browser_prefers_64bit_chrome_over_32bit_edge(self):
+        chrome=Path('C:/Apps64/Google/Chrome/Application/chrome.exe')
+        edge=Path('C:/Apps32/Microsoft/Edge/Application/msedge.exe')
+        with patch.dict(native_web.os.environ,{'ProgramFiles':'C:/Apps64','ProgramFiles(x86)':'C:/Apps32',
+                                               'LOCALAPPDATA':'C:/Local','ANNOTAFLOW_NATIVE_BROWSER':''}), \
+             patch.object(native_web.shutil,'which',return_value=None), \
+             patch.object(Path,'is_file',autospec=True,side_effect=lambda p:p in (chrome,edge)):
+            self.assertEqual(native_web.find_browser(),chrome)
+
     def test_startup_failure_always_stops_owned_processes(self):
         for failed_stage in ('backend', 'browser'):
             with self.subTest(stage=failed_stage):

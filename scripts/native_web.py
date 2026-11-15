@@ -26,18 +26,21 @@ def find_browser(explicit=None):
         if not binary.is_file():
             raise RuntimeError('Khong tim thay Edge/Chrome tai ANNOTAFLOW_NATIVE_BROWSER.')
         return binary
-    candidates = []
-    for base in (os.environ.get('ProgramFiles(x86)'), os.environ.get('ProgramFiles'), os.environ.get('LOCALAPPDATA')):
-        if base:
-            candidates.extend((Path(base) / 'Microsoft/Edge/Application/msedge.exe',
-                               Path(base) / 'Google/Chrome/Application/chrome.exe'))
-    for name in ('msedge', 'chrome', 'chromium', 'chromium-browser', 'google-chrome'):
-        found = shutil.which(name)
-        if found:
-            candidates.append(Path(found))
-    for binary in candidates:
-        if binary.is_file():
-            return binary
+    # Search all Chrome locations before Edge, including a 64-bit Chrome when
+    # Edge happens to be installed in Program Files (x86).
+    for relative, commands in (
+        ('Google/Chrome/Application/chrome.exe', ('chrome', 'google-chrome', 'chromium', 'chromium-browser')),
+        ('Microsoft/Edge/Application/msedge.exe', ('msedge',)),
+    ):
+        candidates = [Path(base) / relative for base in (
+            os.environ.get('ProgramFiles(x86)'), os.environ.get('ProgramFiles'), os.environ.get('LOCALAPPDATA')) if base]
+        for name in commands:
+            found = shutil.which(name)
+            if found:
+                candidates.append(Path(found))
+        for binary in candidates:
+            if binary.is_file():
+                return binary
     raise RuntimeError('Can cai Microsoft Edge hoac Google Chrome de mo cua so AnnotaFlow.')
 
 

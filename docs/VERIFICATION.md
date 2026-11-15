@@ -1,5 +1,14 @@
 # Xác minh AnnotaFlow Studio 3
 
+## Ưu tiên Google Chrome cho launcher — 15/11/2026
+
+Launcher tìm tất cả vị trí Chrome trước Edge, kể cả Chrome 64-bit khi Edge nằm trong
+Program Files (x86). Máy kiểm tra chọn đúng `C:\Program Files\Google\Chrome\Application\chrome.exe`.
+**7 test launcher, OK**, 19,505 giây: thêm test ưu tiên browser và chạy lại các tình huống
+đóng web, reload, backend dừng, force-close launcher với Google Chrome thật ở chế độ headless.
+[Log](../backend/private_data/verification/native-chrome-lifecycle.log).
+Hành vi đóng cửa sổ app dừng backend và giữ các cửa sổ trình duyệt khác tiếp tục được xác minh.
+
 ## BAT tự mở web, đóng cửa sổ web dừng backend — 15/11/2026
 
 Lượt cuối: **141 tests, OK**, 66,708 giây, gồm ba luồng Chromium của ứng dụng và ba test
