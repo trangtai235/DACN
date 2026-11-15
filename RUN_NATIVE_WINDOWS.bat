@@ -1,6 +1,7 @@
 @echo off
 setlocal
 set PYTHONUTF8=1
+title AnnotaFlow - mo web va dung backend khi dong web
 cd /d "%~dp0"
 if not exist .venv\Scripts\python.exe (
   py -3.12 --version >nul 2>&1
@@ -18,4 +19,10 @@ if not exist .venv\Scripts\python.exe (
   )
 )
 .venv\Scripts\python.exe scripts\bootstrap_native.py
-if errorlevel 1 pause
+if errorlevel 1 (
+  echo.
+  echo [LOI] Khong khoi dong duoc AnnotaFlow. Xem thong bao ben tren.
+  pause
+  exit /b 1
+)
+exit /b 0

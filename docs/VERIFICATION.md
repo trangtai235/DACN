@@ -1,5 +1,34 @@
 # Xác minh AnnotaFlow Studio 3
 
+## BAT tự mở web, đóng cửa sổ web dừng backend — 15/11/2026
+
+Lượt cuối: **141 tests, OK**, 66,708 giây, gồm ba luồng Chromium của ứng dụng và ba test
+vòng đời tiến trình trên **Windows thật với Edge headless đã cài**.
+[Log toàn bộ](../backend/private_data/verification/django-native-window-full.log),
+[log 6 test launcher riêng](../backend/private_data/verification/native-web-lifecycle.log).
+
+`RUN_NATIVE_WINDOWS.bat` gọi supervisor mới: đợi HTTP backend sẵn sàng, mở cửa sổ Edge/Chrome
+app riêng và theo dõi các page target thuộc cửa sổ đó. Profile riêng theo
+[quy định DevTools của Chrome](https://developer.chrome.com/blog/remote-debugging-port)
+được giữ ở private_data; cổng DevTools ngẫu nhiên chỉ dùng loopback.
+
+Đã kiểm:
+
+- Đóng trang app: launcher thoát, server HTTP test và tiến trình con đã dừng, cổng được giải phóng.
+- Trang tự reload và đổi hash route: backend vẫn chạy. Một browser fixture riêng vẫn sống khi app đóng.
+- Backend bị dừng: cửa sổ app được dọn, launcher báo lỗi và không để sót process.
+- Force-close launcher: Windows Job Object dừng server và descendants, kể cả tiến trình con thử nghiệm.
+- Backend/browser khởi động lỗi được dọn; endpoint profile cũ được xóa khi stale nhưng giữ dữ liệu login;
+  profile đang chạy bị từ chối để tránh nối nhầm cửa sổ.
+
+Đã chạy **BAT thật** sau khi kiểm tra server cũ không có job queued/running. PostgreSQL sẵn sàng,
+không có migration mới; recovery ghi nhận 0 job bị ngắt. Backend trả HTTP 200 và tự mở cửa sổ app
+tại localhost:8000. [Log BAT](../backend/private_data/verification/native-bat-live.log).
+Cửa sổ thật được để mở cho người dùng; thao tác đóng/kill tự động được kiểm trên các fixture
+HTTP/browser riêng, không dùng bình luận hay job của người dùng để thử dừng tiến trình.
+
+Các phần dưới ghi nhận các đợt trước thay đổi launcher.
+
 ## Gán nhãn riêng theo video / nguồn — 15/11/2026
 
 Lượt cuối: **135 tests, OK**, 37,544 giây, gồm ba luồng Chromium trên SQLite cách ly.

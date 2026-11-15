@@ -14,6 +14,8 @@ def main():
         print('1/4 Cai thu vien Python. Lan dau can tai goi tu package index.',flush=True)
         run([sys.executable,'-m','pip','install','--only-binary=:all:','-r',requirements]);stamp.write_text(digest)
     sys.path.insert(0,str(ROOT/'scripts'))
+    from native_web import find_browser, run_web_window
+    browser=find_browser()
     from local_postgres import ensure_local_postgres
     ensure_local_postgres()
     from native_setup import configure
@@ -30,10 +32,11 @@ def main():
     run([sys.executable,'manage.py','recover_local_jobs'],ROOT/'backend',env)
     from server_lifecycle import bind_server_lifetime
     bind_server_lifetime()
-    print('4/4 Mo http://127.0.0.1:8000 — Ctrl+C hoac dong terminal de dung server.',flush=True)
-    run([sys.executable,'manage.py','runserver','127.0.0.1:8000','--noreload'],ROOT/'backend',env)
+    print('4/4 Khoi dong backend va tu mo cua so web AnnotaFlow...',flush=True)
+    run_web_window([sys.executable,'manage.py','runserver','127.0.0.1:8000','--noreload'],ROOT/'backend',env,browser_path=browser)
 
 if __name__=='__main__':
     try:main()
     except subprocess.CalledProcessError:raise SystemExit('Buoc khoi dong chua thanh cong. Xem thong bao ben tren; cau hinh va du lieu duoc giu lai.')
     except KeyboardInterrupt:print('\nDa dung server local.')
+    except RuntimeError as error:raise SystemExit(str(error))

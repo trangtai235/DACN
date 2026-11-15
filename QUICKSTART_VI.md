@@ -4,6 +4,7 @@
 
 - Python **3.12, Windows installer 64-bit**: https://www.python.org/downloads/windows/ . Bật Python Launcher khi cài. Kiểm tra bằng `py -3.12 --version`.
 - PostgreSQL **18** (hoặc 15–17): https://www.postgresql.org/download/windows/ . Chọn PostgreSQL Server và Command Line Tools khi cài. Giữ service hoạt động, thường port 5432. Nhớ mật khẩu quản trị `postgres`. Có thể bỏ qua Stack Builder.
+- Microsoft Edge hoặc Google Chrome để mở cửa sổ app. Script tự tìm bản đã cài trên Windows.
 - Giải nén source thành `C:\AnnotaFlow`. Cần Internet lần đầu để tải package Python. Không cần GPU, Node.js, Docker, WSL hoặc Redis.
 
 ## 2. Chạy
@@ -22,15 +23,25 @@ Khi chạy native, các giá trị trong `.env.local` được ưu tiên hơn bi
 
 Nhấp đúp `RUN_NATIVE_WINDOWS.bat` từ thư mục dự án. Script tạo `.venv`, cài dependency, hỏi host/port/database/role/password PostgreSQL, tạo tài khoản ứng dụng riêng có quyền trên database của nó, migrate, chuẩn bị 3 model và 3 người demo, chạy web.
 
-- Mở http://127.0.0.1:8000.
+- Cửa sổ web AnnotaFlow tự mở tại http://127.0.0.1:8000 khi backend đã sẵn sàng.
 - Tài khoản `tv1` quản lý; `tv2`, `tv3` người gán. Mật khẩu demo tạo ngẫu nhiên được in lần đầu và lưu trong `.env.local`. Không có mật khẩu mặc định chung.
-- Lần sau nhấp đúp lại. Nhấn Ctrl+C ở cửa sổ server để dừng. Không đóng cửa sổ khi đang train/gọi API.
+- Lần sau nhấp đúp lại. **Đóng cửa sổ web AnnotaFlow để dừng cả backend**; Ctrl+C hoặc đóng terminal BAT cũng dừng app. Reload/chuyển màn hình không dừng server. Khi đóng app, job đang chạy sẽ dừng và có thể tiếp tục từ checkpoint sau khi mở lại.
 - Không chia sẻ `.env.local`, `.env.local.backup`, `backend/private_data/` hoặc `.venv/`.
 
 Nếu cổng 8000 đang dùng, dừng server cũ trước. Nếu lỗi kết nối DB, mở `services.msc`, kiểm tra dịch vụ PostgreSQL (ví dụ `postgresql-x64-18`), cổng và mật khẩu. Để cấu hình lại:
 
 ```powershell
 .venv\Scripts\python.exe scripts\native_setup.py --configure
+```
+
+Cửa sổ app dùng profile riêng trong `backend/private_data/native-browser/`, giữ phiên đăng nhập
+cho lần mở sau. Chỉ cửa sổ do launcher mở được theo dõi; đóng tab web mở thủ công trong trình
+duyệt khác không phải thao tác dừng app. Các cửa sổ Edge/Chrome thông thường không bị ảnh hưởng.
+Nếu cài browser ở vị trí riêng, đặt đường dẫn trước khi chạy:
+
+```powershell
+$env:ANNOTAFLOW_NATIVE_BROWSER='C:\Program Files\Google\Chrome\Application\chrome.exe'
+.\RUN_NATIVE_WINDOWS.bat
 ```
 
 Giữ nguyên `DJANGO_SECRET_KEY`: nó bảo vệ khóa API đã mã hóa. Đổi secret yêu cầu nhập lại các khóa API; không tự mất database.

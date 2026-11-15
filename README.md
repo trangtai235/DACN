@@ -37,9 +37,12 @@ Website đồ án chuyên ngành cho nhóm 3 người, viết mới bằng **Dja
 1. Cài **Python 3.12 64-bit** và **PostgreSQL 18 (hoặc 15–17)**. Ghi nhớ mật khẩu tài khoản PostgreSQL `postgres` khi cài.
 2. Giải nén source vào đường dẫn ngắn, ví dụ `C:\AnnotaFlow`.
 3. Nhấp đúp `RUN_NATIVE_WINDOWS.bat`. Lần đầu script hỏi kết nối PostgreSQL, tạo role ứng dụng riêng, database, migrations và dữ liệu demo.
-4. Mở http://127.0.0.1:8000. Dùng `tv1`, `tv2`, `tv3` với mật khẩu demo script in trên máy bạn. Lần sau xem `DEMO_PASSWORD` trong `.env.local` nếu cần.
+4. Cửa sổ web AnnotaFlow tự mở khi backend sẵn sàng. Dùng `tv1`, `tv2`, `tv3` với mật khẩu demo script in trên máy bạn. Lần sau xem `DEMO_PASSWORD` trong `.env.local` nếu cần.
 
-Web native dùng duy nhất cổng 8000 cho cả giao diện và API. Nhấn Ctrl+C hoặc đóng terminal chạy `RUN_NATIVE_WINDOWS.bat` để dừng server và giải phóng cổng. Đóng tab trình duyệt không dừng server. PostgreSQL chạy riêng để lưu dữ liệu.
+Web native dùng duy nhất cổng 8000 cho cả giao diện và API, mở bằng Edge/Chrome trong cửa sổ app riêng.
+**Đóng cửa sổ web AnnotaFlow sẽ tự dừng backend và các tiến trình con, giải phóng cổng 8000.**
+Reload/chuyển trang vẫn giữ app chạy. Ctrl+C hoặc đóng terminal BAT cũng dừng app.
+Phiên đăng nhập của cửa sổ này được giữ trong `backend/private_data/native-browser/`; các cửa sổ trình duyệt thông thường không bị đóng. PostgreSQL chạy riêng để lưu dữ liệu.
 
 Xem [QUICKSTART_VI.md](QUICKSTART_VI.md). Cách này không cần Docker, WSL, Redis hoặc GPU. Tác vụ dùng 2 luồng trong tiến trình web, phù hợp local/nhóm nhỏ; không phải hàng đợi production bền vững. Có recovery sau khi tiến trình dừng.
 
