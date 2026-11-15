@@ -128,7 +128,6 @@ try{
  assert.match(await owner.locator('.yt-comment-text').innerText(),/\[lỗi dịch vụ\]/);
  await openSample(owner,'[lỗi dịch vụ]');
  assert.equal(await owner.locator('[data-consensus]').count(),0);
- await owner.locator('[data-action="collaboration:expose"]').click();
  await owner.locator('.hitl-suggestions').getByText('Prediction #',{exact:false}).first().waitFor();
  await save(owner,null,'needs_context');
  await owner.locator('[data-action="collaboration:skip"]').click();await idle(owner);

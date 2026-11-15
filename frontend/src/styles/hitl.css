@@ -44,6 +44,7 @@
 .hitl-annotation .hitl-label-chip{display:inline-flex;align-items:center;gap:7px;color:var(--label-color);font-size:13px;font-weight:650}
 .hitl-model-detail{font-size:11px;margin-top:7px;color:var(--af-muted)}
 .hitl-model-detail>summary{cursor:pointer}
+.hitl-branch-status{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;font-size:11px;color:var(--af-muted)}
 .hitl-annotation .hitl-model-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .hitl-annotation .hitl-prediction{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;background:var(--af-surface);padding:10px 12px;border:1px solid var(--af-line);border-radius:8px}
 .hitl-prediction>b{font-size:12px}

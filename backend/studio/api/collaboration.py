@@ -71,7 +71,7 @@ def pairs(request, run_id):
     pairs=run.pairs.all()
     if source:pairs=pairs.filter(comment__source=source)
     rows = []
-    for pair in pairs.select_related('comment', 'run__schema', 'local_prediction', 'api_prediction').order_by('id'):
+    for pair in pairs.select_related('comment', 'run__schema','run__local_job','run__llm_job', 'local_prediction', 'api_prediction').order_by('id'):
         state = service.pair_state(pair)
         escalated=pair.decisions.filter(status__in=['escalated','needs_context','undecidable']).exists()
         gold=GoldAnnotation.objects.filter(comment=pair.comment).exists()
@@ -91,13 +91,14 @@ def pairs(request, run_id):
 @api
 @require_GET
 def detail(request, pair_id):
-    pair = get_object_or_404(PredictionPair.objects.select_related('run__schema', 'run__project', 'comment__source'), pk=pair_id)
+    pair = get_object_or_404(PredictionPair.objects.select_related('run__schema', 'run__project','run__local_job','run__llm_job', 'comment__source'), pk=pair_id)
     project_for(request, pair.run.project_id)
     source=resolve_source(pair.run.project,request.GET.get('source'))
     if source and pair.comment.source_id!=source.pk:raise Http404()
     if ReviewTask.objects.filter(run__project=pair.run.project, reviewer=request.user, state='claimed').exists():
         raise PermissionError('Không xem cặp/nhãn con người trong lượt kiểm tra mù.')
-    state = service.pair_state(pair)
+    statuses=service.branch_statuses(pair)
+    state = service.pair_state(pair,statuses)
     if PairDecision.objects.filter(pair__run__project=pair.run.project,user=request.user,status__in=['blind','preliminary'],exposed_at__isnull=True).exclude(pair=pair).exists():
         raise PermissionError('Hoàn tất mẫu độc lập đang mở trước khi nhận mẫu khác.')
     if request.GET.get('supervision')=='1':
@@ -126,7 +127,7 @@ def detail(request, pair_id):
             clock_tick(d,'start','first_decision');d.save(update_fields=['clock'])
     own = Annotation.objects.filter(comment=pair.comment, user=request.user).first()
     reveal = bool(d and d.exposed_at and d.viewed_predictions == [pk for pk in (pair.local_prediction_id, pair.api_prediction_id) if pk]) and not in_blind(pair.run.project, request.user)
-    return JsonResponse({'workspace_version':1,'id': pair.id, 'text': pair.text, 'context': pair.context, 'state': state,
+    return JsonResponse({'workspace_version':1,'prediction_status':statuses,'id': pair.id, 'text': pair.text, 'context': pair.context, 'state': state,
         'comment_id':pair.comment_id,'source_id':pair.comment.source_id,'source':pair.comment.source.name,'source_kind':pair.comment.source.kind,
         'video_id':pair.comment.source.external_id if pair.comment.source.kind=='youtube' else '',
         'external_id':pair.comment.external_id,'author':pair.comment.author,
@@ -203,6 +204,17 @@ def retry(request, run_id):
         setattr(run, field, job); run.save(update_fields=[field])
         audit(run.project, request.user, 'pair_retry', run=run.pk, branch=branch, job=job.pk)
     return JsonResponse({'job_id': job.pk})
+
+
+@api
+@require_POST
+def resume(request,run_id):
+    old=get_object_or_404(AutoLabelRun,pk=run_id,schema__isnull=False)
+    project_for(request,old.project_id,True);visible(old.project,request.user)
+    payload=data(request)
+    run=service.resume_run(old.pk,request.user,payload)
+    pair_id=run.pairs.filter(comment_id=payload.get('comment_id')).values_list('id',flat=True).first()
+    return JsonResponse({'id':run.pk,'count':run.pairs.count(),'pair_id':pair_id})
 
 
 @api

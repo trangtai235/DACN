@@ -32,12 +32,37 @@ gợi ý có thể gán thủ công hoặc tạo lượt riêng. Trong lúc đ�
 
 Ở **Gán nhãn tự động → Bắt đầu gán nhãn**, tùy chọn **Human-in-the-loop** được bật sẵn.
 Khi bắt đầu, hệ thống tạo run có snapshot và chuyển thẳng sang hàng đợi người duyệt của run đó.
-Không chuyển kết quả máy thành nhãn người. Hai job chạy độc lập; tải tiến độ để thấy kết quả mới.
+Không chuyển kết quả máy thành nhãn người. Hai job chạy độc lập; bình luận đang mở tự cập nhật
+trạng thái/gợi ý mỗi 3 giây khi job còn chờ hoặc đang chạy và cửa sổ đang hiển thị.
 Chưa có API thì vẫn duyệt được với local/human-only, không hiển thị đồng thuận hai model giả.
 
 Tắt tùy chọn để dùng luồng tự gán cũ. Các run cũ thiếu metadata đầy đủ không được tự biến thành
 cặp có provenance mới; chúng vẫn đọc/xuất được riêng. Muốn dùng luồng HITL mới, tạo một lượt hỗ trợ mới.
 Tạo lượt có API thật vẫn có thể phát sinh phí theo cấu hình provider.
+
+## Khi model chưa có gợi ý hoặc server đã dừng
+
+Vùng gợi ý lấy cả trạng thái job và kết quả đã lưu của từng nhánh Local/API. **Chờ chạy**
+khác **Đang chạy**; khi job failed/cancelled sau khi đóng server, giao diện báo **Lượt tạo
+gợi ý đã dừng**, không tiếp tục báo model đang xử lý. Kết quả hoàn tất trước khi dừng vẫn đọc được.
+Chỉ một nhánh có kết quả được hiển thị riêng, không gọi là đồng thuận hai mô hình.
+
+Người quản lý bấm **Tiếp tục tạo gợi ý** ngay trên bình luận. Hộp thoại cố định video của
+bình luận đó, chọn sẵn Local nếu chạy lại được và **không chọn sẵn API**. Chỉ khi đánh dấu
+API và gửi biểu mẫu, hệ thống mới tạo job gọi nhà cung cấp. Mở rồi hủy hộp thoại không tạo job.
+
+API `POST /api/studio/collaboration/runs/<id>/resume` nhận `source_id`, danh sách `branches`
+(`local`/`api`), `request_key` và `comment_id` hiện tại. Backend kiểm tra quản lý, nguồn thuộc
+dự án, bộ nhãn/hash dữ liệu chưa đổi và job cũ đã dừng. Lượt tiếp tục chỉ gồm bình luận
+**còn thiếu kết quả của nhánh được chọn trong video đó**. Các Prediction đã hoàn tất được
+tham chiếu lại chính xác; nhánh chưa chọn giữ trạng thái chưa chạy. Không ghi đè lượt cũ,
+annotation/gold hay sao chép quyết định/thời gian người thành quan sát thực nghiệm mới.
+
+Ghi chú/cụm từ đang soạn được chuyển sang đúng bình luận của lượt tiếp tục; mẫu hiện tại đã
+có đủ kết quả của nhánh chọn thì mở mẫu còn thiếu tiếp theo, giữ bản nháp mẫu cũ ở lượt cũ.
+Gợi ý tự cập nhật giữ ô ghi chú và nội dung đang nhập; bất đồng vẫn yêu cầu bước chọn độc lập
+và thao tác mở gợi ý rõ ràng. Tải gợi ý chỉ đọc kết quả và ghi nhận exposure nếu hiển thị,
+không tự khởi động lại model, gọi suy luận API, chọn nhãn hay lưu annotation.
 
 ## Người gán kiểm tra và quyết định
 

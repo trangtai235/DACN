@@ -1,5 +1,36 @@
 # Xác minh AnnotaFlow Studio 3
 
+## Sửa trạng thái model và tiếp tục gợi ý theo video — 15/11/2026
+
+Lượt cuối: **147 tests, OK**, 72,979 giây, gồm ba luồng browser cách ly và vòng đời Chrome
+trên Windows. **70 module source/build**, **16 converter** qua; migration dry-run không
+có thay đổi. [Log hồi quy](../backend/private_data/verification/django-prediction-resume-full.log),
+[browser theo nguồn](../backend/private_data/verification/source-scope-browser.json),
+[ảnh gợi ý một nhánh](../backend/private_data/verification/hitl-resumed-local-suggestion.png).
+
+Tái hiện trên PostgreSQL đang dùng: run #5 có job Local #38/API #39 đã failed sau khi
+server dừng, nhưng JSON của từng cặp còn pending/running. Giao diện trước sửa chỉ đọc
+JSON nên báo đang xử lý dù không còn worker. Trạng thái mới đối chiếu job với Prediction
+đã lưu; kết quả hoàn tất vẫn giữ nguyên, thiếu kết quả sau khi dừng báo interrupted.
+
+Thêm 5 test API/service: phân biệt queued/running/interrupted và giữ dự đoán đã hoàn tất;
+tiếp tục đúng nguồn/nhánh thiếu, tham chiếu lại Prediction có sẵn; API chỉ tạo job khi
+được yêu cầu; idempotency; quyền quản lý/nguồn/schema/job đang chạy; recovery lúc native
+startup. Worker API chạy bằng mock và xác minh nhãn sửa của người/gold không bị thay đổi.
+
+Browser mở video D có hai job failed: không báo đang chạy, hủy hộp thoại không tạo job,
+Local được chọn sẵn còn API tắt. Gửi tạo đúng một job Local và chỉ hàng đợi D; reload
+giữ run/video/note. Dùng response tổng hợp để mô phỏng worker chuyển running → complete:
+gợi ý tự hiện, không mất note/focus và không tự chọn nhãn hay gọi là đồng thuận.
+Luồng bất đồng vẫn phải lưu lựa chọn độc lập rồi bấm mở gợi ý; hồi quy browser xác minh.
+
+Kiểm tra `resume_run` thực tế trên PostgreSQL bằng transaction **rollback toàn bộ**:
+nguồn #10 chỉ chọn 50 mẫu thiếu Local, không tạo job API; dispatch không được gọi và số
+bản ghi Job/Prediction/AutoLabelRun/Annotation/PairDecision trước/sau bằng nhau.
+[Bằng chứng](../backend/private_data/verification/postgres-prediction-resume.json).
+Đây là số lượng dữ liệu hiện có và kiểm thử kỹ thuật, không phải metrics mô hình.
+Không chạy suy luận thật hoặc gọi API thương mại trong đợt sửa này.
+
 ## Ưu tiên Google Chrome cho launcher — 15/11/2026
 
 Launcher tìm tất cả vị trí Chrome trước Edge, kể cả Chrome 64-bit khi Edge nằm trong

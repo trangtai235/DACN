@@ -1,6 +1,6 @@
-import {api} from '../../core/api.js?v=332cf58721ec';
-﻿import {state,DEMO} from '../../core/state.js?v=332cf58721ec';
-import {T,esc,icon,heading,btn,num,pct} from '../../core/ui.js?v=332cf58721ec';
+import {api} from '../../core/api.js?v=78e859b430db';
+﻿import {state,DEMO} from '../../core/state.js?v=78e859b430db';
+import {T,esc,icon,heading,btn,num,pct} from '../../core/ui.js?v=78e859b430db';
 let latest=null;
 export async function load(){latest=DEMO?null:(await api('studio/auto-label/runs?project='+state.workspace.project.id)).runs[0];}
 export function render(){

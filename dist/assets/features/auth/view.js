@@ -1,4 +1,4 @@
-import {icon} from '../../core/icons.js?v=332cf58721ec';
+import {icon} from '../../core/icons.js?v=78e859b430db';
 
 export const authText = {
  vi: {

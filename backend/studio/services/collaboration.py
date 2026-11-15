@@ -1,6 +1,7 @@
 import json
 import time
 import uuid
+from copy import deepcopy
 from pathlib import Path
 from django.db import transaction
 from django.utils import timezone
@@ -23,12 +24,39 @@ def human_label_exposures(project,user):
         action='human_supervision_view').values_list('detail',flat=True)}
 
 
-def pair_state(pair):
+def prediction_ready(pair, branch):
+    return pair.branches.get(branch,{}).get('state')=='complete' and bool(getattr(pair,branch+'_prediction_id'))
+
+
+def branch_statuses(pair):
+    jobs={'local':pair.run.local_job,'api':pair.run.llm_job}
+    active=any(job and job.status in ('queued','running') for job in jobs.values())
+    result={}
+    messages={'complete':'Đã có gợi ý.','queued':'Đang chờ xử lý.','running':'Mô hình đang chạy.',
+              'interrupted':'Lượt xử lý đã dừng; chưa có gợi ý cho bình luận này.',
+              'paused':'Nhánh này chưa được chọn chạy.','error':'Nhánh xử lý bị lỗi; chưa có gợi ý hợp lệ.',
+              'missing':'Chưa cấu hình nhánh này.','incompatible':'Model chưa tương thích với bộ nhãn.'}
+    for branch,job in jobs.items():
+        raw=pair.branches.get(branch,{}).get('state','missing')
+        if prediction_ready(pair,branch):state='complete'
+        elif raw in ('incompatible','missing','error','paused'):state=raw
+        elif raw in ('pending','running'):
+            state={'queued':'queued','running':'running','failed':'interrupted','cancelled':'interrupted'}.get(job.status if job else '', 'interrupted' if not job else 'error')
+        else:state='error'
+        config=pair.run.model_config if branch=='local' else pair.run.connection_config
+        result[branch]={'state':state,'job_state':job.status if job else None,'message':messages[state],
+                        'can_resume':bool(config) and not active and state in ('interrupted','error','paused')}
+    return result
+
+
+def pair_state(pair, statuses=None):
     if pair.text_hash != text_hash(pair.comment.text, pair.comment.context) or pair.run.schema.sha256 != current_schema(pair.run.project).sha256:
         return 'stale'
-    states = [pair.branches.get(b, {}).get('state', 'missing') for b in ('local', 'api')]
+    states = [s['state'] for s in (statuses or branch_statuses(pair)).values()]
     if 'incompatible' in states: return 'incompatible'
-    if any(s in ('pending', 'running') for s in states): return 'pending'
+    if 'running' in states:return 'pending'
+    if 'queued' in states:return 'queued'
+    if 'interrupted' in states:return 'interrupted'
     if any(s != 'complete' for s in states): return 'partial_error'
     if not pair.local_prediction_id or not pair.api_prediction_id: return 'partial_error'
     return 'agreement' if pair.local_prediction.label == pair.api_prediction.label else 'disagreement'
@@ -81,6 +109,57 @@ def start_run(project, actor, payload):
     if connection: run.llm_job = enqueue(project, actor, 'paired_predict', {'run_id': run.id, 'branch': 'api'})
     run.save(update_fields=['local_job', 'llm_job'])
     audit(project, actor, 'pair_run_created', run=run.pk, schema=schema.pk, request_key=key)
+    return run
+
+
+@transaction.atomic
+def resume_run(run_id, actor, payload):
+    old=AutoLabelRun.objects.select_for_update(of=('self',)).select_related('project','schema','local_job','llm_job').get(pk=run_id)
+    mutation_guard(old.project,actor,True)
+    source=resolve_source(old.project,payload.get('source_id'))
+    if not source:raise ValueError('Chọn một video/nguồn để tiếp tục tạo gợi ý.')
+    branches=payload.get('branches',[])
+    if not isinstance(branches,list) or not branches or any(b not in ('local','api') for b in branches):raise ValueError('Chọn ít nhất một nhánh Local/API hợp lệ.')
+    branches=list(dict.fromkeys(branches))
+    key=str(payload.get('request_key') or uuid.uuid4())
+    if len(key)>80:raise ValueError('Mã yêu cầu quá dài.')
+    previous=AutoLabelRun.objects.filter(project=old.project,request_key=key).first()
+    if previous:
+        if previous.options.get('resume_of')!=old.pk or previous.options.get('source_id')!=source.pk:raise ValueError('Mã yêu cầu đã dùng cho phạm vi khác.')
+        return previous
+    if any(job and job.status in ('queued','running') for job in (old.local_job,old.llm_job)):raise ValueError('Lượt đang chờ/chạy; hãy đợi kết quả hoặc dừng trước khi tiếp tục.')
+    if current_schema(old.project).sha256!=old.schema.sha256:raise ValueError('Bộ nhãn đã đổi. Tạo lượt mới thay vì chạy lại gợi ý cũ.')
+    for branch in branches:
+        if not (old.model_config if branch=='local' else old.connection_config):raise ValueError('Nhánh '+branch+' chưa có cấu hình. Chọn model/API và tạo lượt mới.')
+    originals=[pair for pair in old.pairs.filter(comment__source=source,comment__unusable=False).select_related('comment')
+               if any(not prediction_ready(pair,b) for b in branches)]
+    if not originals:raise ValueError('Các nhánh đã chọn đã có đủ gợi ý cho video này.')
+    if any(p.text_hash!=text_hash(p.comment.text,p.comment.context) for p in originals):raise ValueError('Bình luận đã đổi. Tạo lượt mới cho dữ liệu hiện tại.')
+    run=AutoLabelRun.objects.create(project=old.project,actor=actor,schema=old.schema,request_key=key,
+        labels=deepcopy(old.labels),items=[{'id':p.comment_id,'text':p.text,'context':p.context} for p in originals],
+        model_config=deepcopy(old.model_config),connection_config=deepcopy(old.connection_config),
+        options={**old.options,'resume_of':old.pk,'source_id':source.pk,'selected_branches':branches})
+    for original in originals:
+        states={}
+        for branch in ('local','api'):
+            state=deepcopy(original.branches.get(branch,{}))
+            state['source_pair_id']=original.pk
+            if prediction_ready(original,branch):state['state']='complete'
+            else:
+                state.update(state='pending' if branch in branches else 'paused',error='')
+                for field in ('started_at','finished_at'):state.pop(field,None)
+                if branch=='api' and branch in branches:
+                    state['examples']=retrieve(old.project,old.schema,original.comment) if run.options.get('few_shot') else []
+            states[branch]=state
+        PredictionPair.objects.create(run=run,comment=original.comment,text=original.text,context=original.context,text_hash=original.text_hash,
+            local_prediction_id=original.local_prediction_id if prediction_ready(original,'local') else None,
+            api_prediction_id=original.api_prediction_id if prediction_ready(original,'api') else None,branches=states)
+    for branch in branches:
+        if any(not prediction_ready(p,branch) for p in originals):
+            field='local_job' if branch=='local' else 'llm_job'
+            setattr(run,field,enqueue(old.project,actor,'paired_predict',{'run_id':run.pk,'branch':branch}))
+    run.save(update_fields=['local_job','llm_job'])
+    audit(old.project,actor,'pair_run_resumed',run=run.pk,source_run=old.pk,source=source.pk,branches=branches)
     return run
 
 

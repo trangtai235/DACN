@@ -7,10 +7,11 @@ const fixture=JSON.parse(process.env.ANNOTAFLOW_SOURCE_FIXTURE),base=process.arg
 const browser=await chromium.launch({headless:true,...(process.env.ANNOTAFLOW_BROWSER_EXECUTABLE?{executablePath:process.env.ANNOTAFLOW_BROWSER_EXECUTABLE}:{})});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 await context.addCookies([{name:'sessionid',value:process.env.ANNOTAFLOW_SOURCE_SESSION,url:base}]);
-const page=await context.newPage(),errors=[],writes=[];
+const page=await context.newPage(),errors=[],writes=[],resumes=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('response',r=>{if(r.url().includes('/api/')&&r.status()>=400)errors.push(r.status()+' '+new URL(r.url()).pathname);});
 page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/decision'))writes.push(r.postDataJSON());});
+page.on('request',r=>{if(r.method()==='POST'&&/\/runs\/\d+\/resume$/.test(r.url()))resumes.push(r.postDataJSON());});
 const folder=path.resolve('backend/private_data/verification');fs.mkdirSync(folder,{recursive:true});
 const idle=()=>page.waitForFunction(()=>window.__sourceState?.busy===false);
 async function attach(){await page.waitForSelector('h1');await page.waitForLoadState('networkidle');await page.evaluate(async()=>{window.__sourceState=(await import('/assets/core/state.js'+new URL(document.querySelector('script[type=module]').src).search)).state;});await idle();}
@@ -84,7 +85,59 @@ try{
  const run=await page.locator('#paired-run').inputValue();
  const result=await (await page.request.get(base+`/api/studio/collaboration/runs/${run}?source=${fixture.sources[2]}`)).json();
  assert.deepEqual(result.rows.map(r=>r.comment_id),[fixture.comments[4]]);
+ await annotate(3);
+ await page.locator('.yt-comment-text').filter({hasText:'[Video D-1]'}).waitFor();
+ assert.equal(await page.locator('#paired-run').inputValue(),String(fixture.interrupted));
+ assert.match(await page.locator('.hitl-suggestions').innerText(),/Lượt tạo gợi ý đã dừng/);
+ assert.equal(await page.locator('.hitl-suggestions').innerText().then(text=>text.includes('đang chạy')),false);
+ await page.locator('.hitl-tools').evaluate(el=>el.open=true);
+ await page.locator('#hitl-workspace-slot summary').filter({hasText:'Thêm ghi chú'}).click();
+ await page.locator('#hitl-note').fill('Nháp khi model đã dừng');
+ await page.locator('[data-action="collaboration:resumePredictions"]').click();await idle();
+ assert.equal(await page.locator('[role=dialog] input[name=source_id]').inputValue(),String(fixture.sources[3]));
+ assert.equal(await page.locator('[role=dialog] input[value=local]').isChecked(),true);
+ assert.equal(await page.locator('[role=dialog] input[value=api]').isChecked(),false);
+ await page.locator('[role=dialog] form [data-action="ui:close"]').click();await idle();
+ assert.equal(resumes.length,0);
+ await page.locator('[data-action="collaboration:resumePredictions"]').click();await idle();
+ await page.locator('[role=dialog] button[type=submit]').click();await idle();
+ assert.equal(resumes.length,1);assert.deepEqual(resumes[0].branches,['local']);
+ assert.equal(String(resumes[0].source_id),String(fixture.sources[3]));
+ const resumedRun=await page.locator('#paired-run').inputValue();assert.notEqual(resumedRun,String(fixture.interrupted));
+ const resumedRows=await (await page.request.get(base+`/api/studio/collaboration/runs/${resumedRun}?source=${fixture.sources[3]}`)).json();
+ assert.deepEqual(resumedRows.rows.map(r=>r.comment_id),[fixture.comments[5]]);
+ const dashboard=await (await page.request.get(base+`/api/studio/collaboration?project=${fixture.project}&source=${fixture.sources[3]}`)).json();
+ const resumed=dashboard.runs.find(r=>String(r.id)===resumedRun);
+ assert.ok(resumed.local_job);assert.equal(resumed.api_job,null);
+ assert.equal(await page.locator('#hitl-note').inputValue(),'Nháp khi model đã dừng');
+ await page.reload();await attach();
+ assert.equal(await page.locator('#paired-run').inputValue(),resumedRun);
+ assert.equal(await page.locator('#hitl-note').inputValue(),'Nháp khi model đã dừng');
+ // Simulate asynchronous worker timing only; the API tests execute the mocked worker itself.
+ let stage='running';const resumedPair=resumedRows.rows[0].id;
+ const detailUrl=new RegExp(`/api/studio/collaboration/pairs/${resumedPair}\\?source=${fixture.sources[3]}$`);
+ await page.route(detailUrl,async route=>{
+  const response=await route.fetch(),value=await response.json();
+  value.state=stage==='running'?'pending':'partial_error';
+  value.prediction_status.local={state:stage,job_state:stage==='running'?'running':'complete',can_resume:false,message:'Synthetic worker timing'};
+  if(stage==='complete'){
+   value.revealed=true;value.local={id:900000,label:'NON_TOXIC',model:'Synthetic poll result',source:'local',spans:[]};
+   value.branches.local={state:'complete'};
+  }
+  await route.fulfill({response,json:value});
+ });
+ await page.locator('#hitl-note').focus();
+ await page.locator('.hitl-suggestions').getByText('Local đang chạy. Gợi ý sẽ tự cập nhật.',{exact:true}).waitFor({timeout:12000});
+ stage='complete';
+ await page.locator('.hitl-suggestions').getByText('Synthetic poll result · Prediction #900000',{exact:true}).waitFor({timeout:12000});
+ assert.equal(await page.locator('#hitl-note').inputValue(),'Nháp khi model đã dừng');
+ assert.equal(await page.locator('#hitl-note').evaluate(el=>el===document.activeElement),true);
+ assert.equal(await page.locator('input[name=label]').inputValue(),'');
+ assert.equal(await page.locator('[data-consensus]').count(),0);
+ assert.equal(writes.length,2);
+ await page.screenshot({path:path.join(folder,'hitl-resumed-local-suggestion.png'),fullPage:true});
+ await page.unroute(detailUrl);
  assert.deepEqual(errors,[]);
- fs.writeFileSync(path.join(folder,'source-scope-browser.json'),JSON.stringify({status:'SOURCE_SCOPE_BROWSER_OK',synthetic:true,flows:['video-card-to-filtered-HITL','mixed-old-run-filtered-by-video','progress-per-video','separate-drafts-and-reload','end-of-video-does-not-cross-source','manual-queue-and-drafts-per-video','no-predictions-no-global-fallback','automatic-run-retains-selected-source'],pageErrors:errors},null,2));
+ fs.writeFileSync(path.join(folder,'source-scope-browser.json'),JSON.stringify({status:'SOURCE_SCOPE_BROWSER_OK',synthetic:true,flows:['video-card-to-filtered-HITL','mixed-old-run-filtered-by-video','progress-per-video','separate-drafts-and-reload','end-of-video-does-not-cross-source','manual-queue-and-drafts-per-video','no-predictions-no-global-fallback','automatic-run-retains-selected-source','interrupted-job-not-reported-running','resume-video-with-local-only-api-off','cancel-does-not-start-workers','resume-and-reload-retain-draft','automatic-suggestion-update-preserves-focused-note','single-model-is-not-consensus-or-human-label'],pageErrors:errors},null,2));
  console.log('SOURCE_SCOPE_BROWSER_OK');
 }catch(error){await page.screenshot({path:path.join(folder,'source-scope-failure.png'),fullPage:true}).catch(()=>{});console.error(JSON.stringify({errors,writes,toasts:await page.locator('#toast-root').innerText().catch(()=>''),url:page.url()}));throw error;}finally{await browser.close();}

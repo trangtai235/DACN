@@ -6,13 +6,19 @@ const color=l=>/^#[0-9a-f]{6}$/i.test(l?.color||'')?l.color:'#6d85a4';
 const name=(labels,key)=>labels.find(l=>l.key===key)?.name||key;
 const chip=(labels,key)=>`<strong class="hitl-label-chip" style="--label-color:${color(labels.find(l=>l.key===key))}"><span class="schema-dot"></span>${esc(name(labels,key))}</strong>`;
 
-function suggestion(c,labels,locked){
+export function suggestion(c,labels,locked,canManage=false){
+ const statuses=c.prediction_status||{};
+ const ready=Object.entries(statuses).filter(([,s])=>s.state==='complete').map(([key])=>key==='local'?'Local':'LLM API');
+ const running=Object.entries(statuses).filter(([,s])=>s.state==='running').map(([key])=>key==='local'?'Local':'LLM API');
+ const canResume=canManage&&!locked&&!['stale','incompatible'].includes(c.state)&&Object.values(statuses).some(s=>s.can_resume);
  const consensus=c.state==='agreement'&&c.revealed&&c.local&&c.api&&c.local.label===c.api.label;
  const prediction=(p,branch,action)=>`<article class="hitl-prediction"><b>${branch}</b>${p?`${chip(c.schema.labels,p.label)}${!consensus?button('Chọn nhãn',action,!labels.some(l=>l.enabled&&l.key===p.label)||locked?'disabled':'','sm'):''}<small>${esc(p.model)} · Prediction #${p.id}</small>`:'<small>Chưa có kết quả hợp lệ.</small>'}</article>`;
  const messages={
   stale:'Gợi ý cũ. Hãy chọn nhãn theo bộ nhãn hiện tại.',
-  pending:'Mô hình đang xử lý. Bạn có thể gán nhãn trực tiếp.',
-  partial_error:'Chưa đủ hai kết quả hợp lệ để gợi ý đồng thuận.',
+  pending:(running.join(' và ')||'Mô hình')+' đang chạy. Gợi ý sẽ tự cập nhật.',
+  queued:'Job đang chờ xử lý. Bạn vẫn có thể gán nhãn trực tiếp.',
+  interrupted:'Lượt tạo gợi ý đã dừng. Model hiện không chạy.',
+  partial_error:ready.length?'Đã có gợi ý '+ready.join(' và ')+'. Chưa đủ hai kết quả để kết luận đồng thuận.':'Chưa có kết quả hợp lệ từ mô hình.',
   incompatible:'Model chưa hỗ trợ bộ nhãn hiện tại.',
   disagreement:'Đã lưu lựa chọn độc lập. Mở gợi ý để đối chiếu.'
  };
@@ -23,7 +29,8 @@ function suggestion(c,labels,locked){
  }else if(c.requires_preliminary){
   body=`<div class="hitl-suggestion-line">${icon('eye',16)}<span>Hai mô hình bất đồng. Chọn nhãn độc lập trước khi xem gợi ý.</span></div>`;
  }else{
-  body=`<div class="hitl-suggestion-line">${icon('info',16)}<span>${c.revealed&&c.state==='disagreement'?'Đối chiếu hai gợi ý và chọn nhãn cuối.':messages[c.state]||'Chưa có gợi ý đồng thuận.'}</span>${!c.revealed&&!locked&&c.state!=='pending'?button('Xem gợi ý','expose','','sm'):''}</div>`;
+  body=`<div class="hitl-suggestion-line">${icon('info',16)}<span>${c.revealed&&c.state==='disagreement'?'Đối chiếu hai gợi ý và chọn nhãn cuối.':messages[c.state]||'Chưa có gợi ý đồng thuận.'}</span>${canResume?button('Tiếp tục tạo gợi ý','resumePredictions','','sm'):''}${['pending','queued'].includes(c.state)?button('Tải gợi ý','refreshSuggestions','','sm'):!c.revealed&&ready.length?button('Xem gợi ý','expose','','sm'):''}</div>`;
+  if(!c.revealed&&Object.keys(statuses).length)body+=`<div class="hitl-branch-status">${Object.entries(statuses).map(([key,s])=>`<span title="${esc(s.message)}">${key==='local'?'Local':'LLM API'} · ${esc({queued:'Chờ chạy',running:'Đang chạy',interrupted:'Đã dừng',error:'Lỗi',paused:'Chưa chạy',missing:'Chưa cấu hình',incompatible:'Không tương thích',complete:'Đã có kết quả'}[s.state]||s.state)}</span>`).join('')}</div>`;
  }
  if(c.revealed){
   body+=`<details class="hitl-model-detail" ${consensus?'':'open'}><summary>Chi tiết mô hình</summary><div class="hitl-model-results">${prediction(c.local,'Local','useLocal')}${prediction(c.api,'LLM API','useApi')}</div>
@@ -65,7 +72,7 @@ export function workspace(c,draft,labels,preferences,position={}){
  return `<div class="annotation-layout hitl-annotation"><section class="panel annotation-panel">
  <div class="panel-head"><div><h2>Bình luận #${c.comment_id}</h2>${position.total?`<span class="hitl-position">Mẫu ${position.index} / ${position.total}</span>`:''}</div><span class="count-pill ${c.mine.status==='confirmed'?'hitl-saved':''}">${esc(status)}</span></div>
  <div class="annotation-body">${locked?'<p class="info-banner">Dự án đã khóa. Quản lý cần mở khóa trước khi lưu.</p>':''}
- ${commentCard(c,{compact:true})}${suggestion(c,labels,locked)}
+ ${commentCard(c,{compact:true})}${suggestion(c,labels,locked,position.can_manage)}
  <form data-submit="collaboration:decision"><fieldset ${locked?'disabled':''} class="hitl-fields"><input type="hidden" name="label" value="${esc(draft.selected_label)}">
  <div class="hitl-label-heading"><label>Chọn nhãn</label><span>${c.requires_preliminary?'Lưu lựa chọn độc lập':'Bấm để lưu & chuyển tiếp'}</span></div>
  ${invalid?'<p class="info-banner" role="alert">Nhãn trong bản nháp đã ngừng dùng. Chọn nhãn đang dùng hoặc sửa cụm từ trước khi lưu.</p>':''}
