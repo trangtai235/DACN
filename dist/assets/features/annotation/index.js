@@ -1,10 +1,10 @@
-import {annotationSourceId,selectAnnotationSource,sourceScopeBar,scopeDraftKind} from '../../core/annotation-scope.js?v=00d8c624ac88';
-import {commentCard} from './comment-card.js?v=00d8c624ac88';
-import {state,DEMO} from '../../core/state.js?v=00d8c624ac88';
-import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=00d8c624ac88';
-import {api,projectQuery} from '../../core/api.js?v=00d8c624ac88';
-import {refresh,repaint,navigate} from '../../core/events.js?v=00d8c624ac88';
-import {T,esc,icon,heading,btn,panel,badge,empty,toast,labelName,modal,closeModal,field,formEnd} from '../../core/ui.js?v=00d8c624ac88';
+import {annotationSourceId,selectAnnotationSource,sourceScopeBar,scopeDraftKind} from '../../core/annotation-scope.js?v=7d9a7701690b';
+import {commentCard} from './comment-card.js?v=7d9a7701690b';
+import {state,DEMO} from '../../core/state.js?v=7d9a7701690b';
+import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js?v=7d9a7701690b';
+import {api,projectQuery} from '../../core/api.js?v=7d9a7701690b';
+import {refresh,repaint,navigate} from '../../core/events.js?v=7d9a7701690b';
+import {T,esc,icon,heading,btn,panel,badge,empty,toast,labelName,modal,closeModal,field,formEnd} from '../../core/ui.js?v=7d9a7701690b';
 let row=null,labels=[],preferences={},sentence,spans=[],picked=new Set(),lastPick=null,note='',history=[],lastSaved=null,goldDraft=null,openedAt=Date.now();
 let expectedRevision=0,scopeId='',projectId=null;
 const rememberNote=()=>{const v=document.querySelector('#annotation-note');if(v)note=v.value;};

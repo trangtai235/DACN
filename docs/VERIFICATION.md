@@ -1,5 +1,38 @@
 # Xác minh AnnotaFlow Studio 3
 
+## Dịch bình luận, hiện bất đồng và giảm độ trễ gợi ý — 15/11/2026
+
+**156 tests, OK**, 67,718 giây; gồm ba luồng browser, dịch HTTP mock cho ba giao thức,
+quyền/cache/retry và các test vòng đời Chrome trên Windows. **70 module source/build**,
+**16 converter** qua; migration dry-run không thiếu thay đổi.
+[Log đầy đủ](../backend/private_data/verification/django-translation-hitl-full.log).
+
+Thêm 9 test cho dịch và HITL: cache sau reload không dịch lại; giữ text/hash/original_text,
+không tạo Prediction/Annotation/Gold; chặn sai dự án/video/hash và review mù; thiếu cấu hình,
+timeout/retry; yêu cầu đang chạy trả tiến độ thay vì gọi API trùng; recovery sau gián đoạn;
+từ chối nội dung đã đổi trong lúc dịch. Ba giao thức OpenAI-compatible/Gemini/Ollama dùng
+HTTP MockTransport, kiểm tra JSON đầu ra và không tạo kết quả thay thế khi output lỗi.
+
+HITL thông thường hiện cả hai Prediction khi bất đồng ngay lúc mở bình luận. API nhận rõ
+`assisted_view: true`, ghi exposure/AIExposure và không giả lập preliminary_label độc lập.
+API không bật cờ này vẫn giữ bước preliminary cũ; review mù theo ngân sách tiếp tục chặn
+xem gợi ý và dịch máy. Browser kiểm tra hai nhãn hiện trước khi chọn, nút nhãn vẫn tự lưu,
+dịch không thay bản gốc, giữ note khi reload và escape output có thẻ HTML.
+[Ảnh bất đồng](../backend/private_data/verification/hitl-disagreement-visible.png),
+[ảnh dịch mock](../backend/private_data/verification/hitl-translation.png).
+
+Hàng đợi dùng schema/prefetch chung thay vì truy vấn từng dòng. Trên fixture SQLite, cả
+**1 mẫu và 41 mẫu đều dùng 20 truy vấn** (CaptureQueriesContext, có trong log). Workspace
+exposure trả luôn chi tiết nên giảm một GET; chu kỳ đọc gợi ý đang chạy giảm 3 → 1 giây.
+Đây là số đo truy vấn và cấu hình polling, chưa đo mức tăng tốc suy luận checkpoint thật.
+
+Đã áp dụng `studio.0011_commenttranslation` trên PostgreSQL của máy. Kiểm tra API dịch
+bằng mock trong transaction rollback: một lần gọi, lần sau hit cache; cặp của bình luận
+trong ảnh trả trạng thái disagreement cùng đúng hai Prediction ID, không đòi nhãn sơ bộ.
+Số bản ghi Job/Prediction/Annotation/Gold/PairDecision/CommentTranslation/AIExposure trước
+và sau kiểm tra bằng nhau. Không gọi nhà cung cấp thật, không chạy lại model hoặc sửa nhãn.
+[Kết quả PostgreSQL](../backend/private_data/verification/postgres-translation-hitl.json).
+
 ## Đồng bộ giao diện Mô hình & API — 15/11/2026
 
 Trang `#models` dùng cùng heading/panel/button/input/modal sáng của workspace. Bỏ menu

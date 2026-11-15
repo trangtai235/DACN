@@ -1,4 +1,4 @@
-import {state} from './state.js?v=00d8c624ac88';
+import {state} from './state.js?v=7d9a7701690b';
 const key=kind=>`annotaflow.draft.${state.workspace?.user?.id}.${state.workspace?.project?.id}.${kind}`;
 export function readDraft(kind){try{return JSON.parse(sessionStorage.getItem(key(kind))||'null');}catch{return null;}}
 export function writeDraft(kind,value){sessionStorage.setItem(key(kind),JSON.stringify(value));}

@@ -62,6 +62,26 @@ try{
  }
  assert.equal(await owner.locator('.hitl-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight),true,'Core controls fit in the desktop viewport');
  await owner.screenshot({path:path.join(folder,'hitl-consensus.png'),fullPage:true});
+ const original=await owner.locator('.yt-comment-text').innerText();
+ await owner.locator('.hitl-tools').evaluate(el=>el.open=true);
+ await owner.locator('#hitl-workspace-slot summary').filter({hasText:'Thêm ghi chú'}).click();
+ await owner.locator('#hitl-note').fill('Ghi chú khi dịch');
+ await owner.locator('[data-action="collaboration:translate"]').click();await idle(owner);
+ assert.equal(await owner.locator('[data-action="collaboration:sentence"]').first().isEnabled(),true);
+ await owner.locator('#hitl-note').fill('Ghi chú khi dịch');
+ await owner.locator('.comment-translation-text').waitFor();
+ assert.equal(await owner.locator('.yt-comment-text').innerText(),original);
+ assert.equal(await owner.locator('#hitl-note').inputValue(),'Ghi chú khi dịch');
+ assert.equal(await owner.locator('#hitl-translation script').count(),0);
+ assert.equal(await owner.locator('input[name=label]').inputValue(),'');
+ await owner.screenshot({path:path.join(folder,'hitl-translation.png'),fullPage:true});
+ await owner.reload();await owner.waitForLoadState('networkidle');
+ await owner.evaluate(async()=>{window.__smokeState=(await import('/assets/core/state.js'+new URL(document.querySelector('script[type=module]').src).search)).state;});await idle(owner);
+ await owner.locator('.comment-translation-text').waitFor();
+ assert.match(await owner.locator('.comment-translation-text').innerText(),/Bản dịch thử nghiệm/);
+ assert.equal(requests.filter(r=>r.includes('/translation')&&r.startsWith('POST')).length,1);
+ await owner.locator('.hitl-tools').evaluate(el=>el.open=false);
+ await owner.locator('#hitl-translation details').evaluate(el=>el.open=false);
  const beforeOldBackend=requests.filter(r=>r.endsWith('/decision')).length;
  const oldDetail=/\/api\/studio\/collaboration\/pairs\/\d+$/;
  await owner.route(oldDetail,async route=>{const response=await route.fetch();const value=await response.json();delete value.workspace_version;delete value.comment_id;delete value.tokens;await route.fulfill({response,json:value});});
@@ -90,12 +110,11 @@ try{
  assert.match(await owner.locator('.yt-comment-text').innerText(),/\[bất đồng\]/);
  await openSample(owner,'[bất đồng]');
  assert.equal(await owner.locator('[data-action="collaboration:expose"]').count(),0);
- assert.equal(await owner.locator('.hitl-suggestions').getByText('Prediction #',{exact:false}).count(),0);
- await save(owner,'SPAM','preliminary');
- assert.match(await owner.locator('.yt-comment-text').innerText(),/\[bất đồng\]/);
- assert.equal(await owner.locator('.hitl-suggestions').getByText('Prediction #',{exact:false}).count(),0);
- await owner.locator('[data-action="collaboration:expose"]').click();
- await owner.locator('.hitl-suggestions').getByText('Prediction #',{exact:false}).first().waitFor();
+ assert.equal(await owner.locator('.hitl-suggestions').getByText('Prediction #',{exact:false}).count(),2);
+ await owner.locator('.hitl-disagreement').getByText('Hai mô hình không đồng thuận.',{exact:true}).waitFor();
+ assert.equal(await owner.locator('input[name=label]').inputValue(),'');
+ assert.equal(await owner.locator('.hitl-model-detail').evaluate(el=>el.open),true);
+ await owner.screenshot({path:path.join(folder,'hitl-disagreement-visible.png'),fullPage:true});
  await save(owner,'SPAM');
  await openSample(owner,'[hai model cùng sai]');
  await owner.locator('[data-consensus]').waitFor();
@@ -205,7 +224,7 @@ try{
  assert.equal(new URL(owner.url()).hash,'#human-review');
  assert.notEqual(await owner.locator('#paired-run').inputValue(),previousRun);
  assert.deepEqual(errors,[]);
- const summary={status:'BROWSER_SMOKE_OK',synthetic:true,widths:[360,768,1366],flows:['compact-workspace-controls-above-fold','optional-tools-collapsed','real-progress-after-save','skip-without-content-label','consensus-display-without-saving','accept-suggestion-saves-and-advances','label-click-saves-with-note-and-spans','failed-autosave-keeps-draft-after-reload','double-click-single-write','saved-label-survives-reload','blind-disagreement-preliminary-on-click','both-wrong-human-correction','api-error','feedback-approval','manual-select-before-save','human-label-export','automatic-to-human-queue','budget-pause-resume','third-person-adjudication'],pageErrors:errors};
+ const summary={status:'BROWSER_SMOKE_OK',synthetic:true,widths:[360,768,1366],flows:['compact-workspace-controls-above-fold','optional-tools-collapsed','real-progress-after-save','skip-without-content-label','consensus-display-without-saving','accept-suggestion-saves-and-advances','label-click-saves-with-note-and-spans','failed-autosave-keeps-draft-after-reload','double-click-single-write','saved-label-survives-reload','disagreement-shows-both-labels-before-selection','translation-cache-and-reload','translation-keeps-original-and-draft','translation-output-escaped','both-wrong-human-correction','api-error','feedback-approval','manual-select-before-save','human-label-export','automatic-to-human-queue','budget-pause-resume','third-person-adjudication'],pageErrors:errors};
  fs.writeFileSync(path.join(folder,'browser-smoke.json'),JSON.stringify(summary,null,2));
  console.log('BROWSER_SMOKE_OK');
 }catch(error){

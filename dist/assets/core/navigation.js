@@ -1,5 +1,5 @@
-import {T} from './state.js?v=00d8c624ac88';
-import {icon} from './icons.js?v=00d8c624ac88';
+import {T} from './state.js?v=7d9a7701690b';
+import {icon} from './icons.js?v=7d9a7701690b';
 
 export const nav = [
  ['overview','Tổng quan','Overview','chart'],

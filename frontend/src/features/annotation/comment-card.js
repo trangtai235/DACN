@@ -1,6 +1,6 @@
 import {T,esc,icon} from '../../core/ui.js';
 
-export function commentCard(row,{compact=false}={}){
+export function commentCard(row,{compact=false,translation=''}={}){
  const youtube=row.source_kind==='youtube';
  const author=row.author||T('Không có tên tác giả','Unknown author');
  const initial=Array.from(author.replace(/^@/,''))[0]||'?';
@@ -10,6 +10,6 @@ export function commentCard(row,{compact=false}={}){
  const sourceLink=url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${T('Xem trên YouTube','View on YouTube')} ${icon('arrow',14)}</a>`:'';
  return `<article class="yt-comment-card ${compact?'compact-comment':''}" aria-label="${T('Bình luận gốc','Original comment')}">
  ${compact?'':`<div class="yt-comment-source"><span>${youtube?icon('youtube',18):icon('message',18)}${youtube?'YouTube':T('Bình luận','Comment')}</span>${sourceLink}</div>`}
- <div class="yt-comment-main"><span class="yt-comment-avatar" aria-hidden="true">${esc(initial.toUpperCase())}</span><div class="yt-comment-content"><div class="yt-comment-byline"><b>${esc(author)}</b>${timestamp?`<time datetime="${esc(row.published_at)}">${esc(timestamp)}</time>`:''}</div><p class="yt-comment-text">${esc(row.text)}</p>${row.context?`<details class="yt-comment-parent"><summary>${T('Xem bình luận cha','View parent comment')}</summary><p>${esc(row.context)}</p></details>`:''}</div></div>
+ <div class="yt-comment-main"><span class="yt-comment-avatar" aria-hidden="true">${esc(initial.toUpperCase())}</span><div class="yt-comment-content"><div class="yt-comment-byline"><b>${esc(author)}</b>${timestamp?`<time datetime="${esc(row.published_at)}">${esc(timestamp)}</time>`:''}</div><p class="yt-comment-text">${esc(row.text)}</p>${translation}${row.context?`<details class="yt-comment-parent"><summary>${T('Xem bình luận cha','View parent comment')}</summary><p>${esc(row.context)}</p></details>`:''}</div></div>
  ${compact?`<footer class="compact-comment-source"><span title="${esc(row.source||'')}">${icon(youtube?'youtube':'message',14)}${esc(row.source||T('Dữ liệu dự án','Project data'))}</span>${sourceLink}</footer>`:row.source?`<p class="yt-comment-video">${T('Nguồn','Source')}: ${esc(row.source)}</p>`:''}</article>`;
 }

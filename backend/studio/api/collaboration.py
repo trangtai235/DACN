@@ -70,27 +70,39 @@ def pairs(request, run_id):
     source=resolve_source(run.project,request.GET.get('source'))
     pairs=run.pairs.all()
     if source:pairs=pairs.filter(comment__source=source)
+    schema=current_schema(run.project)
+    items=list(pairs.select_related('comment','run__project','run__schema','run__local_job','run__llm_job','local_prediction','api_prediction').prefetch_related('decisions__schema','comment__annotations').order_by('id'))
+    comment_ids=[pair.comment_id for pair in items]
+    gold_ids=set(GoldAnnotation.objects.filter(comment_id__in=comment_ids).values_list('comment_id',flat=True))
+    approved_ids=set(FeedbackApproval.objects.filter(comment_id__in=comment_ids,revoked=False,decision__schema_id=F('schema_id'),
+        decision_revision=F('decision__revision'),decision__status='confirmed').values_list('comment_id','text_hash'))
+    can_manage=manager(run.project,request.user)
     rows = []
-    for pair in pairs.select_related('comment', 'run__schema','run__local_job','run__llm_job', 'local_prediction', 'api_prediction').order_by('id'):
-        state = service.pair_state(pair)
-        escalated=pair.decisions.filter(status__in=['escalated','needs_context','undecidable']).exists()
-        gold=GoldAnnotation.objects.filter(comment=pair.comment).exists()
-        confirmed=pair.decisions.filter(status='confirmed').exists()
+    for pair in items:
+        state = service.pair_state(pair,schema=schema)
+        decisions=list(pair.decisions.all())
+        mine=next((d for d in decisions if d.user_id==request.user.id),None)
+        escalated=any(d.status in ('escalated','needs_context','undecidable') for d in decisions)
+        gold=pair.comment_id in gold_ids
+        confirmed=any(d.status=='confirmed' for d in decisions)
         review_state='awaiting_adjudication' if escalated else 'adjudicated' if gold else 'reviewed' if confirmed else 'awaiting_review'
         # Listing never reveals model labels before opening the dedicated flow.
         rows.append({'id': pair.id, 'comment_id': pair.comment_id,'source_id':pair.comment.source_id, 'text': pair.text, 'state': state,
-                     'mine': decision_json(pair.decisions.filter(user=request.user).first()),
+                     'mine': decision_json(mine),
                      'escalated': escalated,'review_state':review_state,
-                     'feedback_approved':FeedbackApproval.objects.filter(comment=pair.comment,revoked=False,decision__schema_id=F('schema_id'),
-                         decision_revision=F('decision__revision'),decision__status='confirmed',text_hash=pair.text_hash).exists(),
-                     'can_adjudicate':manager(run.project,request.user) and not pair.decisions.filter(user=request.user).exclude(status='draft').exists()
-                                      and not pair.comment.annotations.filter(user=request.user).exists()})
+                     'feedback_approved':(pair.comment_id,pair.text_hash) in approved_ids,
+                     'can_adjudicate':can_manage and not (mine and mine.status!='draft')
+                                      and not any(a.user_id==request.user.id for a in pair.comment.annotations.all())})
     return JsonResponse({'scope_source_id':source.pk if source else None,'rows': rows, 'schema': run.schema.snapshot, 'demo': run.options.get('demo', False)})
 
 
 @api
 @require_GET
 def detail(request, pair_id):
+    return detail_response(request,pair_id)
+
+
+def detail_response(request,pair_id):
     pair = get_object_or_404(PredictionPair.objects.select_related('run__schema', 'run__project','run__local_job','run__llm_job', 'comment__source'), pk=pair_id)
     project_for(request, pair.run.project_id)
     source=resolve_source(pair.run.project,request.GET.get('source'))
@@ -98,7 +110,8 @@ def detail(request, pair_id):
     if ReviewTask.objects.filter(run__project=pair.run.project, reviewer=request.user, state='claimed').exists():
         raise PermissionError('Không xem cặp/nhãn con người trong lượt kiểm tra mù.')
     statuses=service.branch_statuses(pair)
-    state = service.pair_state(pair,statuses)
+    schema=current_schema(pair.run.project)
+    state = service.pair_state(pair,statuses,schema)
     if PairDecision.objects.filter(pair__run__project=pair.run.project,user=request.user,status__in=['blind','preliminary'],exposed_at__isnull=True).exclude(pair=pair).exists():
         raise PermissionError('Hoàn tất mẫu độc lập đang mở trước khi nhận mẫu khác.')
     if request.GET.get('supervision')=='1':
@@ -127,7 +140,7 @@ def detail(request, pair_id):
             clock_tick(d,'start','first_decision');d.save(update_fields=['clock'])
     own = Annotation.objects.filter(comment=pair.comment, user=request.user).first()
     reveal = bool(d and d.exposed_at and d.viewed_predictions == [pk for pk in (pair.local_prediction_id, pair.api_prediction_id) if pk]) and not in_blind(pair.run.project, request.user)
-    return JsonResponse({'workspace_version':1,'prediction_status':statuses,'id': pair.id, 'text': pair.text, 'context': pair.context, 'state': state,
+    return JsonResponse({'workspace_version':1,'assisted_view_supported':True,'text_hash':pair.text_hash,'prediction_status':statuses,'id': pair.id, 'text': pair.text, 'context': pair.context, 'state': state,
         'comment_id':pair.comment_id,'source_id':pair.comment.source_id,'source':pair.comment.source.name,'source_kind':pair.comment.source.kind,
         'video_id':pair.comment.source.external_id if pair.comment.source.kind=='youtube' else '',
         'external_id':pair.comment.external_id,'author':pair.comment.author,
@@ -135,7 +148,7 @@ def detail(request, pair_id):
         'tokens':[{'text':m.group(),'start':m.start(),'end':m.end()} for m in re.finditer(r'\S+',pair.text)],
         'my_spans':own.spans if own else [],'annotation_count':pair.comment.annotations.filter(status='submitted').count(),
         'requires_preliminary':service.pair_disagrees(pair) and not d.preliminary_label and not d.exposed_at,
-        'human_schema':current_schema(pair.run.project).snapshot,
+        'human_schema':schema.snapshot,
         'schema': pair.run.schema.snapshot, 'mine': decision_json(d), 'annotation_revision': own.revision if own else 0,
         'clock':d.clock,'prior_assistance':not bool(d.exposed_at) and (AIExposure.objects.filter(comment=pair.comment,user=request.user).exists()
             or pair.comment_id in service.human_label_exposures(pair.run.project,request.user)),
@@ -149,7 +162,9 @@ def detail(request, pair_id):
 def expose(request, pair_id):
     pair = get_object_or_404(PredictionPair.objects.select_related('run__schema', 'run__project', 'comment'), pk=pair_id)
     project_for(request, pair.run.project_id)
-    source=resolve_source(pair.run.project,data(request).get('source_id'))
+    payload=data(request)
+    assisted=payload.get('assisted_view') is True
+    source=resolve_source(pair.run.project,payload.get('source_id'))
     if source and pair.comment.source_id!=source.pk:raise ValueError('Bình luận không thuộc video/nguồn đã chọn.')
     if ReviewTask.objects.filter(run__project=pair.run.project, reviewer=request.user, state='claimed').exists():
         raise PermissionError('Đang có lượt kiểm tra mù theo ngân sách.')
@@ -158,13 +173,14 @@ def expose(request, pair_id):
         raise PermissionError('Hoàn tất lượt mù khác trước khi mở gợi ý.')
     with transaction.atomic():
         d, _ = PairDecision.objects.select_for_update().get_or_create(pair=pair, user=request.user, defaults={'schema': pair.run.schema, 'status': 'draft'})
-        if service.pair_disagrees(pair) and not d.preliminary_label and not d.exposed_at:
+        if service.pair_disagrees(pair) and not d.preliminary_label and not d.exposed_at and not assisted:
             raise ValueError('Chọn nhãn độc lập và lưu trước khi xem hai gợi ý.')
         if not d.exposed_at: d.exposed_at = timezone.now()
+        if assisted and d.status=='blind' and not d.preliminary_label:d.status='draft'
         d.viewed_predictions = [pk for pk in (pair.local_prediction_id, pair.api_prediction_id) if pk]
         d.save(); AIExposure.objects.get_or_create(comment=pair.comment, user=request.user)
-        audit(pair.run.project, request.user, 'pair_exposure', pair=pair.pk, predictions=d.viewed_predictions)
-    return JsonResponse({'ok': True})
+        audit(pair.run.project, request.user, 'pair_exposure', pair=pair.pk, predictions=d.viewed_predictions,mode='assisted' if assisted else 'after_preliminary')
+    return detail_response(request,pair_id) if payload.get('include_workspace') is True else JsonResponse({'ok': True})
 
 
 @api

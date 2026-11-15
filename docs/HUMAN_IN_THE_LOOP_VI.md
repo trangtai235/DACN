@@ -33,7 +33,7 @@ gợi ý có thể gán thủ công hoặc tạo lượt riêng. Trong lúc đ�
 Ở **Gán nhãn tự động → Bắt đầu gán nhãn**, tùy chọn **Human-in-the-loop** được bật sẵn.
 Khi bắt đầu, hệ thống tạo run có snapshot và chuyển thẳng sang hàng đợi người duyệt của run đó.
 Không chuyển kết quả máy thành nhãn người. Hai job chạy độc lập; bình luận đang mở tự cập nhật
-trạng thái/gợi ý mỗi 3 giây khi job còn chờ hoặc đang chạy và cửa sổ đang hiển thị.
+trạng thái/gợi ý mỗi 1 giây khi job còn chờ hoặc đang chạy và cửa sổ đang hiển thị.
 Chưa có API thì vẫn duyệt được với local/human-only, không hiển thị đồng thuận hai model giả.
 
 Tắt tùy chọn để dùng luồng tự gán cũ. Các run cũ thiếu metadata đầy đủ không được tự biến thành
@@ -60,9 +60,29 @@ annotation/gold hay sao chép quyết định/thời gian người thành quan s
 
 Ghi chú/cụm từ đang soạn được chuyển sang đúng bình luận của lượt tiếp tục; mẫu hiện tại đã
 có đủ kết quả của nhánh chọn thì mở mẫu còn thiếu tiếp theo, giữ bản nháp mẫu cũ ở lượt cũ.
-Gợi ý tự cập nhật giữ ô ghi chú và nội dung đang nhập; bất đồng vẫn yêu cầu bước chọn độc lập
-và thao tác mở gợi ý rõ ràng. Tải gợi ý chỉ đọc kết quả và ghi nhận exposure nếu hiển thị,
+Gợi ý tự cập nhật giữ ô ghi chú và nội dung đang nhập. HITL thông thường hiện ngay hai nhãn
+khi bất đồng và ghi nhận lượt có hỗ trợ. Tải gợi ý chỉ đọc kết quả và ghi nhận exposure nếu hiển thị,
 không tự khởi động lại model, gọi suy luận API, chọn nhãn hay lưu annotation.
+
+## Dịch bình luận sang tiếng Việt
+
+Bấm **Dịch sang tiếng Việt** dưới nội dung gốc. Kết nối API mặc định của dự án được dùng
+để dịch; cần cấu hình khóa/model trong **Mô hình & API**. OpenAI-compatible, Gemini và
+Ollama đã có tích hợp; không có kết nối thì báo rõ, không tạo bản dịch giả hay tự chọn
+dịch vụ ngoài dự án. Nút dịch gửi nguyên văn bình luận đến nhà cung cấp khi chưa có cache.
+
+Bản dịch hiện trong phần riêng có thể thu gọn, kèm nhà cung cấp/model. Văn bản gốc, hash,
+spans và nhãn không bị thay đổi; offsets vẫn tính trên bản gốc. Dịch không khóa việc nhập
+ghi chú hoặc gán nhãn. Kết quả được cache trong `CommentTranslation` theo bình luận/hash
+và ngôn ngữ đích; reload giữ bản dịch đang xem. Yêu cầu trùng khi đang dịch chỉ chờ kết quả,
+không gọi API lần hai. Nếu server dừng hoặc nhà cung cấp lỗi có thể thử lại.
+
+API `POST /api/studio/comments/<id>/translation` nhận `project`, `source_id`, `text_hash`
+của cặp đang mở; `GET` cùng tham số chỉ đọc tiến độ/cache. Backend kiểm tra thành viên,
+dự án, video và văn bản chưa đổi. Bản dịch là hỗ trợ máy, có audit/exposure; không tạo
+Prediction, annotation hoặc gold. Luồng review mù theo ngân sách không được dịch máy.
+
+Chạy `python backend/manage.py migrate` sau khi cập nhật để tạo bảng cache dịch.
 
 ## Người gán kiểm tra và quyết định
 
@@ -84,12 +104,13 @@ Các nút lưu nâng cao nằm trong phần này; thao tác bấm nhãn chính v
    không chạy suy luận lại, không tự chọn nhãn và không tạo annotation/gold.
 3. **Bấm nhãn**, **Dùng gợi ý** hoặc **Chọn nhãn Local/LLM** sẽ lưu ngay và chuyển sang mẫu
    tiếp theo sau khi server xác nhận. Thêm cụm từ hoặc ghi chú trước khi bấm nhãn để lưu kèm.
-   Với bất đồng, lần bấm đầu chỉ lưu lựa chọn độc lập và giữ nguyên mẫu để mở hai gợi ý;
-   sau đó bấm nhãn để xác nhận nhãn cuối và tiếp tục. Bản nháp cụm từ vẫn được giữ qua bước này.
+   Với bất đồng, hai nhãn Local/API hiện ngay, kèm thông báo **Hai mô hình không đồng thuận**;
+   bấm nhãn để lưu quyết định cuối và chuyển tiếp. Không tạo lựa chọn độc lập giả sau khi xem máy.
 4. Không đủ thông tin thì chọn **Cần thêm ngữ cảnh**, **Không thể quyết định**, **Bỏ qua**
    hoặc **Chuyển phân xử**. Các trạng thái này không bị biến thành một lớp nội dung.
 5. **Lưu quyết định** giữ nguyên bình luận; **Lưu & tiếp tục** chỉ chuyển sau khi lưu thành công.
-   Bước lưu độc lập vẫn giữ mẫu để xem và xác nhận gợi ý. Nhãn người/spans nằm trong Annotation,
+   Giao thức độc lập cũ vẫn có qua API không bật `assisted_view`; review mù/người thứ ba
+   theo ngân sách vẫn giữ các giới hạn cũ. Nhãn người/spans nằm trong Annotation,
    có revision và lịch sử, không ghi đè hai Prediction. Phím 1–9 chọn và lưu nhãn;
    Enter lưu; Shift + Enter lưu và tiếp tục khi không nhập văn bản.
 
@@ -101,6 +122,11 @@ Nếu thấy **Cần cập nhật backend**, khởi động lại server Python 
 Launcher native chạy với `--noreload` để giữ các job thread: thay file Python không tự nạp code mới.
 Ctrl + F5 chỉ cập nhật frontend; cần dừng/khởi động lại backend sau khi cập nhật code backend,
 khi không có job đang chạy. API detail dùng workspace_version để phát hiện bản không tương thích.
+
+Hàng đợi tải schema và các quyết định/annotation theo lô thay vì truy vấn lặp theo từng mẫu.
+Khi mở gợi ý, `POST .../expose` với `assisted_view: true, include_workspace: true` trả luôn
+workspace đã ghi nhận exposure, giảm một lượt GET; bộ nhãn vẫn lấy từ API quản lý nhãn chung.
+Đây là tối ưu truy vấn/độ trễ hiển thị; chưa đo mức tăng tốc suy luận thực của checkpoint lớn.
 
 Mẫu lỗi, đang xử lý, model không tương thích hoặc schema/văn bản cũ có thông báo riêng;
 không hiển thị đồng thuận giả. Nhãn vừa tạo chỉ dùng để người gán chọn; model cần được train/đánh giá

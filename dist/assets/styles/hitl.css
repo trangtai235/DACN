@@ -1,4 +1,11 @@
 /* Focused annotation workspace, using AnnotaFlow's shared controls and palette. */
+.comment-translation{margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.comment-translation>small,.comment-translation details small{font-size:11px;color:var(--af-muted);line-height:1.7}
+.comment-translation details{width:100%;padding:14px 16px;border:1px solid var(--af-line);border-radius:10px;background:#f6f9fc}
+.comment-translation summary{cursor:pointer;font-size:13px;color:var(--af-blue);font-weight:600}
+.comment-translation-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.75;margin:10px 0}
+.comment-translation .form-error{flex-basis:100%;margin:0}
+.hitl-disagreement{border-left:3px solid #cb9645;padding-left:12px}
 .annotation-source-scope{max-width:960px;margin:0 auto 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .annotation-source-scope>label{font-size:11px;color:var(--af-muted)}
 .annotation-source-scope>select{flex:1;min-width:140px;max-width:100%;width:auto;font-size:12px;min-height:35px}

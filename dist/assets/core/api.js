@@ -1,6 +1,6 @@
-import {DEMO,state} from './state.js?v=00d8c624ac88';
-import {demoRequest} from './demo.js?v=00d8c624ac88';
-import {download} from './ui.js?v=00d8c624ac88';
+import {DEMO,state} from './state.js?v=7d9a7701690b';
+import {demoRequest} from './demo.js?v=7d9a7701690b';
+import {download} from './ui.js?v=7d9a7701690b';
 export async function api(path,body){
  if(DEMO)return demoRequest(path,body);
  const csrf=document.cookie.split('; ').find(s=>s.startsWith('csrftoken='))?.split('=')[1]||'';

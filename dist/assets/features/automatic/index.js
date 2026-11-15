@@ -1,8 +1,8 @@
-import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery} from '../../core/annotation-scope.js?v=00d8c624ac88';
-import {state,DEMO} from '../../core/state.js?v=00d8c624ac88';
-import {api} from '../../core/api.js?v=00d8c624ac88';
-import {refresh,navigate} from '../../core/events.js?v=00d8c624ac88';
-import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=00d8c624ac88';
+import {annotationSourceId,selectAnnotationSource,sourceScopeBar,sourceQuery} from '../../core/annotation-scope.js?v=7d9a7701690b';
+import {state,DEMO} from '../../core/state.js?v=7d9a7701690b';
+import {api} from '../../core/api.js?v=7d9a7701690b';
+import {refresh,navigate} from '../../core/events.js?v=7d9a7701690b';
+import {T,esc,heading,btn,panel,select,formEnd,modal,closeModal,toast,num,pct,date,nativeRequired} from '../../core/ui.js?v=7d9a7701690b';
 
 let listing={runs:[],api_ready:false},detail=null,selected=null,projectId=null,page=1,onlyDifferent=false,query='',scopeId='';
 const active=job=>job&&['queued','running'].includes(job.status);

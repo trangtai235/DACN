@@ -32,7 +32,10 @@ Không dùng `settings_test` với database thực nghiệm.
 
 1. Đăng nhập tv1, chuyển sang dự án MINH HỌA, mở **Phối hợp hai mô hình**.
 2. Chọn lượt mới có bốn mẫu. Đồng thuận: mở gợi ý rồi xác nhận; trước click không có gold.
-3. Bất đồng: chọn nhãn độc lập → Lưu → Xem gợi ý. Kiểm tra hai Prediction ID, model và exposure.
+3. Bất đồng: mở bình luận, xem thông báo không đồng thuận cùng hai nhãn Local/API đang hiện.
+   Kiểm tra hai Prediction ID và exposure; chọn nhãn cuối để lưu. Đây là gán có hỗ trợ máy.
+   Bấm **Dịch sang tiếng Việt** để xem bản dịch cạnh bản gốc; reload giữ kết quả và ghi chú.
+   Dịch cần kết nối API mặc định; khi kiểm thử tự động dùng mock, không gọi dịch vụ thật.
 4. Mẫu “hai model cùng sai”: cả hai dự đoán NON_TOXIC nhưng người đổi sang TOXIC.
    Đây là tình huống scripted, không phải tỷ lệ sai đo trên dữ liệu thật.
 5. Mẫu API lỗi: local còn nguyên, API báo lỗi, không hiển thị như bất đồng/đồng thuận.

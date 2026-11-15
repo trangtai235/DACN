@@ -4,11 +4,12 @@ import {api,projectQuery,exportFile} from '../../core/api.js';
 import {refresh,navigate} from '../../core/events.js';
 import {readDraft,writeDraft,clearDraft,rememberWorkspace} from '../../core/workspace-drafts.js';
 import {esc,heading,btn,select,textarea,field,formEnd,modal,closeModal,toast,empty} from '../../core/ui.js';
-import {workspace,suggestion} from './workspace.js';
+import {workspace,suggestion,translationView} from './workspace.js';
 import {administration} from './administration.js';
 
 let data={},rows=[],runId='',current=null,inspection=null,projectId=null,queueFilter='all',scopeId='';
 let labelCatalog={labels:[]},pairDraft=null,restorePairId=null,requestSequence=0,predictionRefreshing=false;
+const translationTasks=new Map();
 const names={pending:'Đang chạy',queued:'Chờ chạy',interrupted:'Đã dừng tạo gợi ý',agreement:'Hai model đồng thuận',disagreement:'Hai model bất đồng',partial_error:'Thiếu/lỗi nhánh',incompatible:'Local không tương thích',stale:'Phiên bản cũ'};
 const humanStatus={confirmed:'Đã xác nhận',draft:'Chưa xác nhận',blind:'Đang chọn độc lập',preliminary:'Đã lưu lựa chọn',escalated:'Chờ phân xử',resolved:'Đã phân xử',needs_context:'Cần ngữ cảnh',undecidable:'Không thể quyết định',skipped:'Đã bỏ qua'};
 const reviewStatus={awaiting_review:'Chờ người duyệt',awaiting_adjudication:'Cần phân xử',reviewed:'Đã có nhãn người',adjudicated:'Đã phân xử'};
@@ -64,7 +65,8 @@ async function openPair(id,preserve=true){
  if(preserve)persistDraft();
  if(current&&String(current.id)!==String(id)&&['blind','preliminary'].includes(current.mine.status)&&!current.mine.exposed_at){toast('Lưu quyết định hoặc bỏ qua mẫu độc lập hiện tại trước khi chuyển.');return;}
  if(current&&String(current.id)!==String(id))await decisionClock('pause').catch(()=>{});
- const sequence=++requestSequence;let value=await api('studio/collaboration/pairs/'+id+(scopeId?'?source='+encodeURIComponent(scopeId):''));
+ const sequence=++requestSequence;
+ let value=await api('studio/collaboration/pairs/'+id+(scopeId?'?source='+encodeURIComponent(scopeId):''));
  if(value.workspace_version!==1||!value.prediction_status||(scopeId&&String(value.source_id)!==scopeId)||!Number.isInteger(value.comment_id)||!Number.isInteger(value.annotation_revision)||!Array.isArray(value.tokens)){
   const message='Backend đang chạy phiên bản cũ hoặc thiếu dữ liệu HITL. Khởi động lại server rồi tải lại trang; bản nháp vẫn được giữ.';
   const slot=document.querySelector('#hitl-workspace-slot');
@@ -72,15 +74,43 @@ async function openPair(id,preserve=true){
   throw new Error(message);
  }
  // Exposure records visibility only: it neither infers nor creates a human annotation.
- if(canExposePredictions(value)){await api(`studio/collaboration/pairs/${id}/expose`,{source_id:scopeId||null});value=await api('studio/collaboration/pairs/'+id+(scopeId?'?source='+encodeURIComponent(scopeId):''));}
- const catalog=await api('studio/labels'+projectQuery());if(sequence!==requestSequence)return;
+ if(canExposePredictions(value))value=await exposePredictions(id);
+ const catalog=await api('studio/labels'+projectQuery());
+ if(sequence!==requestSequence)return;
  current=value;labelCatalog=catalog;state.workspace.labels=catalog.labels;
  const pointer=readDraft(scopeDraftKind('pair',scopeId)),saved=pointer?.pair_id===current.id?pointer:readDraft('pair-'+current.id);
  pairDraft=saved&&saved.text===current.text?{...defaultDraft(current),...saved}:defaultDraft(current);
  if(current.requires_preliminary&&pairDraft.action==='confirm')pairDraft.action='preliminary';if(!current.requires_preliminary&&pairDraft.action==='preliminary')pairDraft.action='confirm';drawPair();persistDraft();
+ if(data.blind&&value.revealed){await refresh();return;}
+ if(pairDraft.translation?.status==='running')startTranslation(true);
 }
 function drawPair(){const slot=document.querySelector('#hitl-workspace-slot');if(slot&&current&&pairDraft)slot.innerHTML=workspace(current,pairDraft,labelCatalog.labels,state.workspace.preferences,workspacePosition());}
-function canExposePredictions(value){return !locked()&&!value.requires_preliminary&&!value.revealed&&!['stale','incompatible','disagreement'].includes(value.state)&&Object.values(value.prediction_status||{}).some(s=>s.state==='complete');}
+function canExposePredictions(value){return !locked()&&!value.revealed&&!['stale','incompatible'].includes(value.state)&&(!value.requires_preliminary||value.assisted_view_supported)&&Object.values(value.prediction_status||{}).some(s=>s.state==='complete');}
+async function exposePredictions(id){const value=await api(`studio/collaboration/pairs/${id}/expose`,{source_id:scopeId||null,assisted_view:true,include_workspace:true});return value.workspace_version===1?value:api('studio/collaboration/pairs/'+id+(scopeId?'?source='+encodeURIComponent(scopeId):''));}
+function startTranslation(checkOnly=false){
+ if(!current||!pairDraft||translationTasks.has(current.id))return;
+ const view=current,source=scopeId,project=state.workspace.project.id;
+ const payload={project,source_id:source||null,text_hash:view.text_hash};
+ const path=`studio/comments/${view.comment_id}/translation`,query='?'+new URLSearchParams(Object.fromEntries(Object.entries(payload).filter(([,v])=>v!==null)));
+ const update=value=>{
+  const saved=readDraft('pair-'+view.id);if(saved)writeDraft('pair-'+view.id,{...saved,translation:value});
+  if(current?.id===view.id&&scopeId===source&&state.workspace.project.id===project){pairDraft.translation=value;persistDraft();const slot=document.querySelector('#hitl-translation');if(slot)slot.outerHTML=translationView(value);}
+ };
+ update({status:'running'});
+ const task=(async()=>{
+  try{
+   let value=checkOnly?await api(path+query):await api(path,payload);
+   while(value.status==='running'){
+    if(current?.id!==view.id||scopeId!==source)return;
+    await new Promise(resolve=>setTimeout(resolve,1000));value=await api(path+query);
+   }
+   if(value.status!=='complete')throw new Error(value.error||'Chưa có bản dịch. Bấm thử dịch lại.');
+   if(value.comment_id!==view.comment_id)throw new Error('Bản dịch không khớp bình luận.');
+   update(value);
+  }catch(error){update({status:'failed',error:error.message});}
+  finally{translationTasks.delete(view.id);}
+ })();translationTasks.set(view.id,task);
+}
 async function refreshPredictions(manual=false){
  if(!current||predictionRefreshing)return;
  predictionRefreshing=true;
@@ -88,7 +118,7 @@ async function refreshPredictions(manual=false){
  try{
   let value=await api(`studio/collaboration/pairs/${id}${scope?'?source='+encodeURIComponent(scope):''}`);
   if(sequence!==requestSequence||current?.id!==id||scopeId!==scope||(!manual&&state.busy))return;
-  if(canExposePredictions(value)){await api(`studio/collaboration/pairs/${id}/expose`,{source_id:scope||null});value=await api(`studio/collaboration/pairs/${id}${scope?'?source='+encodeURIComponent(scope):''}`);}
+  if(canExposePredictions(value))value=await exposePredictions(id);
   if(sequence!==requestSequence||current?.id!==id||scopeId!==scope||(!manual&&state.busy)||!['human-review','collaboration'].includes(state.route))return;
   persistDraft();const phaseChanged=current.requires_preliminary!==value.requires_preliminary;current=value;
   if(phaseChanged){if(value.requires_preliminary)pairDraft.action='preliminary';else if(pairDraft.action==='preliminary')pairDraft.action='confirm';drawPair();persistDraft();}
@@ -97,20 +127,21 @@ async function refreshPredictions(manual=false){
   if(manual)toast('Đã cập nhật trạng thái và gợi ý.');
  }finally{predictionRefreshing=false;}
 }
-setInterval(()=>{if(!DEMO&&['human-review','collaboration'].includes(state.route)&&!state.busy&&!document.hidden&&!document.querySelector('[role=dialog]')&&Object.values(current?.prediction_status||{}).some(s=>['queued','running'].includes(s.state)))refreshPredictions().catch(()=>{});},3000);
+setInterval(()=>{if(!DEMO&&['human-review','collaboration'].includes(state.route)&&!state.busy&&!document.hidden&&!document.querySelector('[role=dialog]')&&Object.values(current?.prediction_status||{}).some(s=>['queued','running'].includes(s.state)))refreshPredictions().catch(()=>{});},1000);
 async function decisionClock(action){const c=current;if(!c||!['blind','draft','preliminary'].includes(c.mine?.status))return;const response=await api(`studio/collaboration/pairs/${c.id}/clock`,{action,source_id:scopeId||null});c.clock=response.clock;}
 setInterval(()=>{if(!DEMO&&['collaboration','human-review'].includes(state.route)&&current?.clock?.state==='active'&&!state.busy&&!document.hidden&&form())decisionClock('heartbeat').catch(()=>{});},10000);
 document.addEventListener('visibilitychange',()=>{if(['collaboration','human-review'].includes(state.route)&&form()){persistDraft();decisionClock(document.hidden?'pause':'resume').catch(()=>{});}});
 async function adjacent(direction=1,eligible=false){const candidates=rows.length?rows:(data.blind_pairs||[]).map(id=>({id})),index=candidates.findIndex(r=>r.id===current?.id);const ordered=direction>0?[...candidates.slice(index+1),...candidates.slice(0,index)]:candidates.slice(0,index).reverse();const next=ordered.find(r=>!eligible||(r.review_state==='awaiting_review'&&r.state!=='stale'&&!['confirmed','skipped','needs_context','undecidable'].includes(r.mine?.status)));if(next)await openPair(next.id);else toast('Không còn mẫu phù hợp. Bạn có thể chọn lại trong hàng đợi.');}
 export async function action(name,el,event){
  const project=state.workspace.project.id;
+ if(name==='translate'){persistDraft();startTranslation();return;}
  if(name==='refreshSuggestions'){await refreshPredictions(true);return;}
  if(name==='resumePredictions'){
   persistDraft();const status=current.prediction_status||{};
   modal('Tiếp tục tạo gợi ý',`<form data-submit="collaboration:resumePredictions" data-request-key="${crypto.randomUUID()}"><p>Chỉ xử lý các mẫu còn thiếu gợi ý trong video <b>${esc(current.source)}</b>. Kết quả đã có và nhãn người được giữ nguyên.</p><input type="hidden" name="source_id" value="${current.source_id}"><label class="check-row"><input type="checkbox" name="branch" value="local" ${status.local?.can_resume?'checked':'disabled'}> Local · model đã chọn của lượt cũ</label><label class="check-row"><input type="checkbox" name="branch" value="api" ${status.api?.can_resume?'':'disabled'}> LLM API · gọi nhà cung cấp và có thể phát sinh phí</label><p class="form-hint">API chỉ chạy khi bạn đánh dấu nhánh này. Lượt tiếp tục chỉ gồm video đang chọn.</p><div class="form-error-slot"></div><div class="flex gap8"><button type="button" class="btn" data-action="ui:close">Hủy</button><button type="submit" class="btn primary">Tiếp tục tạo gợi ý</button></div></form>`);return;
  }
  if(name==='manageLabels'){persistDraft();rememberWorkspace(state.route);await decisionClock('pause').catch(()=>{});closeModal();navigate('label-management');return;}
- if(name==='guide'){modal('Hướng dẫn gán nhãn',`<p>${esc(state.workspace.preferences.guidelines||current?.human_schema?.guidelines||'Chọn nhãn theo quy tắc của dự án.')}</p>${labelCatalog.labels.filter(l=>l.enabled).map(l=>`<p><b>${esc(l.name)}</b>: ${esc(l.description)}. ${esc(l.exclusions||'')}</p>`).join('')}<p>Bấm nhãn hoặc Dùng gợi ý sẽ lưu ngay và chuyển mẫu sau khi lưu thành công. Thêm ghi chú/cụm từ trước khi chọn nhãn. Với bất đồng, lần chọn đầu lưu nhãn độc lập và giữ mẫu để xem gợi ý. Nhãn mới không tự được model hỗ trợ. Phím 1–9: chọn và lưu nhãn; Enter: lưu; Shift + Enter: lưu và tiếp tục.</p>`);return;}
+ if(name==='guide'){modal('Hướng dẫn gán nhãn',`<p>${esc(state.workspace.preferences.guidelines||current?.human_schema?.guidelines||'Chọn nhãn theo quy tắc của dự án.')}</p>${labelCatalog.labels.filter(l=>l.enabled).map(l=>`<p><b>${esc(l.name)}</b>: ${esc(l.description)}. ${esc(l.exclusions||'')}</p>`).join('')}<p>Bấm nhãn hoặc Dùng gợi ý sẽ lưu ngay và chuyển mẫu sau khi lưu thành công. Thêm ghi chú/cụm từ trước khi chọn nhãn. Khi bất đồng, xem nhãn Local và API rồi chọn nhãn cuối; hệ thống ghi nhận lượt có hỗ trợ máy. Nhãn mới không tự được model hỗ trợ. Phím 1–9: chọn và lưu nhãn; Enter: lưu; Shift + Enter: lưu và tiếp tục.</p>`);return;}
  if(name==='next'||name==='previous'){await adjacent(name==='next'?1:-1);return;}
  if(name==='open'){await openPair(el.dataset.id);document.querySelector('#hitl-workspace-slot')?.scrollIntoView({block:'start'});return;}
  if(name==='skip'){if(!current||locked())return;persistDraft();form().elements.action.value='skip';persistDraft();await submit('decision',form(),{submitter:{dataset:{intent:'next'}}});return;}

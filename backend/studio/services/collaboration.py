@@ -49,8 +49,8 @@ def branch_statuses(pair):
     return result
 
 
-def pair_state(pair, statuses=None):
-    if pair.text_hash != text_hash(pair.comment.text, pair.comment.context) or pair.run.schema.sha256 != current_schema(pair.run.project).sha256:
+def pair_state(pair, statuses=None, schema=None):
+    if pair.text_hash != text_hash(pair.comment.text, pair.comment.context) or pair.run.schema.sha256 != (schema or current_schema(pair.run.project)).sha256:
         return 'stale'
     states = [s['state'] for s in (statuses or branch_statuses(pair)).values()]
     if 'incompatible' in states: return 'incompatible'

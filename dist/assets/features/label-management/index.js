@@ -1,8 +1,8 @@
-import {state,DEMO} from '../../core/state.js?v=00d8c624ac88';
-import {api,projectQuery} from '../../core/api.js?v=00d8c624ac88';
-import {refresh,navigate} from '../../core/events.js?v=00d8c624ac88';
-import {returnWorkspace} from '../../core/workspace-drafts.js?v=00d8c624ac88';
-import {esc,heading,panel,btn,field,textarea,modal,closeModal,toast,empty} from '../../core/ui.js?v=00d8c624ac88';
+import {state,DEMO} from '../../core/state.js?v=7d9a7701690b';
+import {api,projectQuery} from '../../core/api.js?v=7d9a7701690b';
+import {refresh,navigate} from '../../core/events.js?v=7d9a7701690b';
+import {returnWorkspace} from '../../core/workspace-drafts.js?v=7d9a7701690b';
+import {esc,heading,panel,btn,field,textarea,modal,closeModal,toast,empty} from '../../core/ui.js?v=7d9a7701690b';
 
 let catalog=null,query='',status='all',projectId=null;
 const writable=()=>catalog?.can_manage&&!catalog.locked&&!catalog.archived;
